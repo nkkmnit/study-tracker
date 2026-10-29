@@ -102,172 +102,142 @@
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white pb-16">
 
-    <!-- 0. Live Preview Mode Switcher Bar -->
-    <aside class="bg-slate-950/95 border-b border-indigo-500/30 px-3 sm:px-4 py-2 z-50 sticky top-0 backdrop-blur-md shadow-md">
-        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="font-bold tracking-wide text-indigo-300">Indian AI Factory • Testing & Live Suite</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <button type="button" onclick="setPreviewMode('student')" id="preview-btn-student" class="px-3 py-1 rounded-lg font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-graduation-cap"></i> <span>छात्र पोर्टल (App)</span>
-                </button>
-                <button type="button" onclick="setPreviewMode('admin')" id="preview-btn-admin" class="px-3 py-1 rounded-lg font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-user-shield"></i> <span>एडमिन पैनल (Admin)</span>
-                </button>
-                <button type="button" onclick="toggleLockOverlayPreview()" id="preview-btn-lock" class="px-2.5 py-1 rounded-lg font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition flex items-center gap-1">
-                    <i class="fa-solid fa-lock"></i> <span id="lock-toggle-text">₹199 लॉक स्क्रीन देखें</span>
-                </button>
+    <!-- Mobile Auto Install Prompt Banner -->
+    <div id="pwa-install-banner" class="hidden glass-panel border-b border-indigo-500/30 p-2.5 px-4 sticky top-0 z-40 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow">
+                <i class="fa-solid fa-mobile-screen"></i>
+            </span>
+            <div class="text-[11px] leading-tight">
+                <span class="font-bold text-white block" data-i18n="installBannerTitle">App Install Karein</span>
+                <span class="text-slate-400" data-i18n="installBannerDesc">Fast & offline access ke liye add karein</span>
             </div>
         </div>
-    </aside>
-
-    <!-- ======================================================== -->
-    <!-- 1. STUDENT APP VIEW (Clean - No admin trace)             -->
-    <!-- ======================================================== -->
-    <div id="student-app-view" class="flex-grow flex flex-col">
-
-        <!-- Mobile Auto Install Prompt Banner -->
-        <div id="pwa-install-banner" class="hidden glass-panel border-b border-indigo-500/30 p-2.5 px-4 sticky top-10 z-40 flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-                <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow">
-                    <i class="fa-solid fa-mobile-screen"></i>
-                </span>
-                <div class="text-[11px] leading-tight">
-                    <span class="font-bold text-white block" data-i18n="installBannerTitle">App Install Karein</span>
-                    <span class="text-slate-400" data-i18n="installBannerDesc">Fast & offline access ke liye add karein</span>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="triggerPwaInstall()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow transition" data-i18n="installBtn">Install</button>
-                <button onclick="dismissInstallBanner()" class="text-slate-400 hover:text-white text-xs px-1.5 py-1">✕</button>
-            </div>
+        <div class="flex items-center gap-2">
+            <button onclick="triggerPwaInstall()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow transition" data-i18n="installBtn">Install</button>
+            <button onclick="dismissInstallBanner()" class="text-slate-400 hover:text-white text-xs px-1.5 py-1">✕</button>
         </div>
+    </div>
 
-        <!-- 1.1 Subscription & Approval Lock Screen Overlay -->
-        <div id="device-lock-screen" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-            <div class="glass-panel rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-7 text-center relative overflow-hidden border border-indigo-500/30">
-                <button type="button" onclick="toggleLockOverlayPreview(false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm p-1" title="Close Preview">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg shadow-indigo-500/30">
-                    <i class="fa-solid fa-brain"></i>
-                </div>
-                <h2 class="text-2xl font-extrabold text-white tracking-tight">Indian AI Factory</h2>
-                <p class="text-xs text-indigo-300 mb-6 font-medium" data-i18n="appSubtitle">Smart Syllabus & AI Study Tracker</p>
-
-                <!-- Registration Step -->
-                <div id="step-register">
-                    <p class="text-xs text-slate-300 mb-4 text-left font-medium" data-i18n="regInstruction">App unlock karne ke liye apna naam aur mobile number enter karein:</p>
-                    <div class="space-y-3 mb-5 text-left">
-                        <div>
-                            <label class="text-xs font-semibold text-slate-400" data-i18n="nameLabel">Aapka Naam</label>
-                            <input type="text" id="user-name" placeholder="Apna pura naam likhein" class="w-full mt-1 px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="text-xs font-semibold text-slate-400" data-i18n="phoneLabel">Mobile Number</label>
-                            <input type="tel" id="user-phone" placeholder="10-digit mobile number" class="w-full mt-1 px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition">
-                        </div>
-                    </div>
-                    <button onclick="submitApprovalRequest()" class="w-full py-3 ai-glow-btn text-white font-semibold rounded-xl text-sm transition flex items-center justify-center gap-2">
-                        <span data-i18n="sendReqBtn">Access Request Bhejein</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </button>
-                </div>
-
-                <!-- Payment / Approval Waiting Step -->
-                <div id="step-payment" class="hidden text-left">
-                    <div class="bg-indigo-950/60 border border-indigo-500/30 p-3.5 rounded-xl mb-4 text-xs text-indigo-200 flex items-start gap-2.5">
-                        <i class="fa-solid fa-circle-check mt-0.5 text-indigo-400"></i>
-                        <div data-i18n="reqSubmittedNotice">Aapki request submit ho chuki hai. Instant activate karne ke liye subscription confirm karein.</div>
-                    </div>
-
-                    <div class="bg-slate-900/70 border border-slate-700/80 rounded-2xl p-4 mb-5">
-                        <div class="flex justify-between items-center mb-2.5">
-                            <span class="text-xs font-semibold text-slate-400" data-i18n="subPassLabel">Lifetime Access Pass</span>
-                            <span class="text-xl font-black text-indigo-400">₹199</span>
-                        </div>
-                        <div class="text-xs text-slate-300 mb-2">
-                            <strong>UPI ID:</strong> 
-                            <span class="font-mono bg-black/50 px-2.5 py-1 rounded-lg border border-slate-700 text-cyan-300 font-semibold" id="display-upi">nareshkhichar@airtel</span>
-                            <button onclick="copyUpiId()" class="ml-1.5 text-indigo-400 hover:text-indigo-300 font-medium"><i class="fa-regular fa-copy"></i> Copy</button>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mt-2 leading-relaxed" data-i18n="upiInstructions">
-                            PhonePe / Google Pay / Paytm se upar di gayi UPI ID par <strong>₹199</strong> transfer karein.
-                        </p>
-                    </div>
-
-                    <div class="text-center space-y-2">
-                        <p class="text-[11px] text-slate-400" data-i18n="waitApprovalMsg">Payment hote hi verify karke aapka account approve ho jayega.</p>
-                        <button onclick="checkStatusManual()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-rotate-right"></i>
-                            <span data-i18n="checkStatusBtn">Approval Status Check Karein</span>
-                        </button>
-                    </div>
-                </div>
+    <!-- 1. Subscription & Approval Lock Screen Overlay -->
+    <div id="device-lock-screen" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-7 text-center relative overflow-hidden border border-indigo-500/30">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg shadow-indigo-500/30">
+                <i class="fa-solid fa-brain"></i>
             </div>
-        </div>
+            <h2 class="text-2xl font-extrabold text-white tracking-tight">Indian AI Factory</h2>
+            <p class="text-xs text-indigo-300 mb-6 font-medium" data-i18n="appSubtitle">Smart Syllabus & AI Study Tracker</p>
 
-        <!-- 1.2 Header -->
-        <header class="glass-panel border-b border-slate-800/80 sticky top-10 z-30 shadow-lg">
-            <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-500/20">
-                        AI
+            <!-- Registration Step -->
+            <div id="step-register">
+                <p class="text-xs text-slate-300 mb-4 text-left font-medium" data-i18n="regInstruction">App unlock karne ke liye apna naam aur mobile number enter karein:</p>
+                <div class="space-y-3 mb-5 text-left">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-400" data-i18n="nameLabel">Aapka Naam</label>
+                        <input type="text" id="user-name" placeholder="Apna pura naam likhein" class="w-full mt-1 px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition">
                     </div>
                     <div>
-                        <h1 class="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none">Indian AI Factory</h1>
-                        <p class="text-[11px] text-slate-400 leading-none mt-1" data-i18n="headerSubtitle">Smart Syllabus & Study Tracker</p>
+                        <label class="text-xs font-semibold text-slate-400" data-i18n="phoneLabel">Mobile Number</label>
+                        <input type="tel" id="user-phone" placeholder="10-digit mobile number" class="w-full mt-1 px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition">
                     </div>
                 </div>
+                <button onclick="submitApprovalRequest()" class="w-full py-3 ai-glow-btn text-white font-semibold rounded-xl text-sm transition flex items-center justify-center gap-2">
+                    <span data-i18n="sendReqBtn">Access Request Bhejein</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Payment / Approval Waiting Step -->
+            <div id="step-payment" class="hidden text-left">
+                <div class="bg-indigo-950/60 border border-indigo-500/30 p-3.5 rounded-xl mb-4 text-xs text-indigo-200 flex items-start gap-2.5">
+                    <i class="fa-solid fa-circle-check mt-0.5 text-indigo-400"></i>
+                    <div data-i18n="reqSubmittedNotice">Aapki request submit ho chuki hai. Instant activate karne ke liye subscription confirm karein.</div>
+                </div>
+
+                <div class="bg-slate-900/70 border border-slate-700/80 rounded-2xl p-4 mb-5">
+                    <div class="flex justify-between items-center mb-2.5">
+                        <span class="text-xs font-semibold text-slate-400" data-i18n="subPassLabel">Lifetime Access Pass</span>
+                        <span class="text-xl font-black text-indigo-400">₹199</span>
+                    </div>
+                    <div class="text-xs text-slate-300 mb-2">
+                        <strong>UPI ID:</strong> 
+                        <span class="font-mono bg-black/50 px-2.5 py-1 rounded-lg border border-slate-700 text-cyan-300 font-semibold" id="display-upi">nareshkhichar@airtel</span>
+                        <button onclick="copyUpiId()" class="ml-1.5 text-indigo-400 hover:text-indigo-300 font-medium"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2 leading-relaxed" data-i18n="upiInstructions">
+                        PhonePe / Google Pay / Paytm se upar di gayi UPI ID par <strong>₹199</strong> transfer karein.
+                    </p>
+                </div>
+
+                <div class="text-center space-y-2">
+                    <p class="text-[11px] text-slate-400" data-i18n="waitApprovalMsg">Payment hote hi verify karke aapka account approve ho jayega.</p>
+                    <button onclick="checkStatusManual()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span data-i18n="checkStatusBtn">Approval Status Check Karein</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="glass-panel border-b border-slate-800/80 sticky top-0 z-30 shadow-lg">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-500/20">
+                    AI
+                </div>
+                <div>
+                    <h1 class="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none">Indian AI Factory</h1>
+                    <p class="text-[11px] text-slate-400 leading-none mt-1" data-i18n="headerSubtitle">Smart Syllabus & Study Tracker</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <!-- Language Switcher Tab (Hindi / English) -->
+                <button onclick="toggleLanguage()" id="lang-toggle-btn" class="text-xs bg-slate-900 border border-slate-700 hover:border-indigo-500 text-slate-300 px-2.5 py-1.5 rounded-xl font-medium transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-language text-indigo-400"></i>
+                    <span id="lang-label">English</span>
+                </button>
+
+                <!-- PWA Install URL button -->
+                <button id="pwa-install-header-btn" onclick="triggerPwaInstall()" class="hidden text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 hover:bg-indigo-500/30 font-semibold px-2.5 py-1.5 rounded-xl transition items-center gap-1.5">
+                    <i class="fa-solid fa-download text-[11px]"></i>
+                    <span data-i18n="installAppHeader">Install App</span>
+                </button>
+
+                <!-- Ambient Rain Sound -->
+                <button onclick="toggleAmbientSound()" id="ambient-btn" title="Focus Rain Noise" class="w-8 h-8 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-400 hover:text-white flex items-center justify-center text-xs transition">
+                    <i class="fa-solid fa-cloud-rain"></i>
+                </button>
                 
-                <div class="flex items-center space-x-2">
-                    <!-- Language Switcher Tab (Hindi / English) -->
-                    <button onclick="toggleLanguage()" id="lang-toggle-btn" class="text-xs bg-slate-900 border border-slate-700 hover:border-indigo-500 text-slate-300 px-2.5 py-1.5 rounded-xl font-medium transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-language text-indigo-400"></i>
-                        <span id="lang-label">English</span>
-                    </button>
-
-                    <!-- PWA Install URL button -->
-                    <button id="pwa-install-header-btn" onclick="triggerPwaInstall()" class="hidden text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 hover:bg-indigo-500/30 font-semibold px-2.5 py-1.5 rounded-xl transition items-center gap-1.5">
-                        <i class="fa-solid fa-download text-[11px]"></i>
-                        <span data-i18n="installAppHeader">Install App</span>
-                    </button>
-
-                    <!-- Ambient Rain Sound -->
-                    <button onclick="toggleAmbientSound()" id="ambient-btn" title="Focus Rain Noise" class="w-8 h-8 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-400 hover:text-white flex items-center justify-center text-xs transition">
-                        <i class="fa-solid fa-cloud-rain"></i>
-                    </button>
-                    
-                    <div class="text-xs text-amber-300 bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/20 font-semibold flex items-center gap-1">
-                        <span>🔥</span> <span id="streak-counter">1</span> <span data-i18n="streakLabel">Day Streak</span>
-                    </div>
+                <div class="text-xs text-amber-300 bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/20 font-semibold flex items-center gap-1">
+                    <span>🔥</span> <span id="streak-counter">1</span> <span data-i18n="streakLabel">Day Streak</span>
                 </div>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <!-- 1.3 Navigation Tabs (Only 'Syllabus' name, RAS removed) -->
-        <nav class="max-w-5xl mx-auto px-4 pt-4 w-full">
-            <div class="grid grid-cols-3 gap-2 p-1.5 glass-panel rounded-2xl border border-slate-800 text-xs sm:text-sm font-semibold">
-                <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="py-2.5 rounded-xl active-ai-tab transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
-                    <i class="fa-solid fa-gauge-high"></i> 
-                    <span data-i18n="tabDashboard">डैशबोर्ड</span>
-                </button>
-                <button onclick="switchTab('syllabus')" id="tab-btn-syllabus" class="py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
-                    <i class="fa-solid fa-layer-group"></i> 
-                    <span data-i18n="tabSyllabus">Syllabus</span>
-                </button>
-                <button onclick="switchTab('timetable')" id="tab-btn-timetable" class="py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
-                    <i class="fa-solid fa-calendar-check"></i> 
-                    <span data-i18n="tabTimeTable">टाइम टेबल</span>
-                </button>
-            </div>
-        </nav>
+    <!-- Navigation Tabs (Only 'Syllabus' name, RAS removed) -->
+    <nav class="max-w-5xl mx-auto px-4 pt-4 w-full">
+        <div class="grid grid-cols-3 gap-2 p-1.5 glass-panel rounded-2xl border border-slate-800 text-xs sm:text-sm font-semibold">
+            <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="py-2.5 rounded-xl active-ai-tab transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
+                <i class="fa-solid fa-gauge-high"></i> 
+                <span data-i18n="tabDashboard">डैशबोर्ड</span>
+            </button>
+            <button onclick="switchTab('syllabus')" id="tab-btn-syllabus" class="py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
+                <i class="fa-solid fa-layer-group"></i> 
+                <span data-i18n="tabSyllabus">Syllabus</span>
+            </button>
+            <button onclick="switchTab('timetable')" id="tab-btn-timetable" class="py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
+                <i class="fa-solid fa-calendar-check"></i> 
+                <span data-i18n="tabTimeTable">टाइम टेबल</span>
+            </button>
+        </div>
+    </nav>
 
-        <!-- 1.4 Main Student Container -->
-        <main class="max-w-5xl mx-auto px-4 py-5 flex-grow w-full space-y-5">
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 py-5 flex-grow w-full space-y-5">
 
             <!-- ================= TAB 1: DASHBOARD ================= -->
             <section id="tab-dashboard" class="space-y-5">
@@ -1114,7 +1084,6 @@
             const lockScreen = document.getElementById('device-lock-screen');
             if (isApproved === 'true') {
                 lockScreen.classList.add('hidden');
-                document.getElementById('lock-toggle-text').innerText = "₹199 लॉक स्क्रीन देखें";
             } else {
                 const reqSent = localStorage.getItem('iaf_req_sent');
                 if (reqSent === 'true') {
@@ -1150,7 +1119,6 @@
             localStorage.setItem('iaf_req_sent', 'true');
             document.getElementById('step-register').classList.add('hidden');
             document.getElementById('step-payment').classList.remove('hidden');
-            alert("रिक्वेस्ट सबमिट हो गई! एडमिन पैनल पर जाकर इसे तुरंत Approve कर सकते हैं।");
         }
 
         function copyUpiId() {
@@ -1166,10 +1134,9 @@
             if (myReq && myReq.status === 'approved') {
                 localStorage.setItem('iaf_user_approved', 'true');
                 document.getElementById('device-lock-screen').classList.add('hidden');
-                document.getElementById('lock-toggle-text').innerText = "₹199 लॉक स्क्रीन देखें";
                 alert('बधाई हो! आपका सब्सक्रिप्शन एक्टिवेट हो गया है।');
             } else {
-                alert('अभी अप्रूवल पेंडिंग है। ऊपर "एडमिन पैनल" में जाकर Approve पर क्लिक करें।');
+                alert('अभी अप्रूवल पेंडिंग है। पेमेंट की पुष्टि होने के बाद यह स्वतः अनलॉक हो जाएगा।');
             }
         }
 
@@ -1702,133 +1669,9 @@
             }
         }
 
-        // ==========================================
-        // ADMIN PORTAL SCRIPT & LOGIC
-        // ==========================================
-        function getStoredAdminPin() {
-            return localStorage.getItem('iaf_admin_pin') || "9999";
-        }
-
-        function verifyAdminPin() {
-            const entered = document.getElementById('admin-pin').value;
-            const validPin = getStoredAdminPin();
-            if (entered === validPin) {
-                document.getElementById('admin-login-modal').classList.add('hidden');
-                document.getElementById('admin-main-content').classList.remove('hidden');
-                loadAdminRequests();
-            } else {
-                alert('गलत PIN! कृपया सही मास्टर PIN (9999) दर्ज करें।');
-            }
-        }
-
-        function adminLogout() {
-            document.getElementById('admin-login-modal').classList.remove('hidden');
-            document.getElementById('admin-main-content').classList.add('hidden');
-            document.getElementById('admin-pin').value = '';
-        }
-
-        function openChangePinModal() {
-            document.getElementById('old-pin-input').value = '';
-            document.getElementById('new-pin-input').value = '';
-            document.getElementById('change-pin-modal').classList.remove('hidden');
-        }
-
-        function closeChangePinModal() {
-            document.getElementById('change-pin-modal').classList.add('hidden');
-        }
-
-        function saveNewAdminPin() {
-            const oldPin = document.getElementById('old-pin-input').value;
-            const newPin = document.getElementById('new-pin-input').value.trim();
-            const currentPin = getStoredAdminPin();
-
-            if (oldPin !== currentPin) {
-                alert('पुराना PIN गलत है!');
-                return;
-            }
-            if (!newPin || newPin.length < 4) {
-                alert('नया PIN कम से कम 4 अंकों का होना चाहिए।');
-                return;
-            }
-
-            localStorage.setItem('iaf_admin_pin', newPin);
-            alert('मास्टर PIN सफलतापूर्वक बदल दिया गया है!');
-            closeChangePinModal();
-        }
-
-        function loadAdminRequests() {
-            const reqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
-            const tbody = document.getElementById('request-table-body');
-            
-            document.getElementById('stat-total-requests').innerText = reqs.length;
-            document.getElementById('stat-approved-requests').innerText = reqs.filter(r => r.status === 'approved').length;
-            document.getElementById('stat-pending-requests').innerText = reqs.filter(r => r.status === 'pending').length;
-
-            if (reqs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">अभी कोई रिक्वेस्ट मौजूद नहीं है। छात्र पोर्टल पर जाकर 'Access Request' भेजें।</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = reqs.map(r => `
-                <tr class="hover:bg-slate-800/40 transition">
-                    <td class="p-3.5">
-                        <div class="font-bold text-white">${r.name || 'Anonymous'}</div>
-                        <div class="text-[11px] text-slate-400">${r.phone || 'N/A'}</div>
-                    </td>
-                    <td class="p-3.5 font-mono text-[11px] text-cyan-300 font-bold">${r.deviceId}</td>
-                    <td class="p-3.5 font-bold text-indigo-300">₹${r.amount || 199}</td>
-                    <td class="p-3.5 text-slate-400">${r.date || 'N/A'}</td>
-                    <td class="p-3.5">
-                        ${r.status === 'approved' 
-                            ? '<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-semibold text-[10px]">Approved</span>'
-                            : '<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-semibold text-[10px]">Pending</span>'
-                        }
-                    </td>
-                    <td class="p-3.5 text-center space-x-1.5">
-                        ${r.status !== 'approved' ? `
-                            <button onclick="updateStatus('${r.deviceId}', 'approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-xl text-[11px] font-semibold transition shadow">
-                                <i class="fa-solid fa-check mr-1"></i> Approve
-                            </button>
-                        ` : `
-                            <button onclick="updateStatus('${r.deviceId}', 'pending')" class="bg-red-500/80 hover:bg-red-500 text-white px-3 py-1 rounded-xl text-[11px] font-semibold transition">
-                                <i class="fa-solid fa-ban mr-1"></i> Revoke
-                            </button>
-                        `}
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function updateStatus(deviceId, newStatus) {
-            let reqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
-            reqs = reqs.map(r => {
-                if (r.deviceId === deviceId) {
-                    return { ...r, status: newStatus };
-                }
-                return r;
-            });
-            localStorage.setItem('iaf_all_requests', JSON.stringify(reqs));
-
-            // Instant Unlock Sync in Student View
-            const myDevId = getDeviceId();
-            if (myDevId === deviceId) {
-                if (newStatus === 'approved') {
-                    localStorage.setItem('iaf_user_approved', 'true');
-                    document.getElementById('device-lock-screen').classList.add('hidden');
-                    document.getElementById('lock-toggle-text').innerText = "₹199 लॉक स्क्रीन देखें";
-                } else {
-                    localStorage.removeItem('iaf_user_approved');
-                }
-            }
-
-            loadAdminRequests();
-            alert(`डिवाइस ${deviceId} को सफलतापूर्वक '${newStatus}' कर दिया गया है!`);
-        }
-
-        // Live Cross-Tab Synchronization
+        // Live Cross-Tab Synchronization with Admin Panel
         window.addEventListener('storage', () => {
             checkDeviceApproval();
-            loadAdminRequests();
         });
 
         // Initialize on load

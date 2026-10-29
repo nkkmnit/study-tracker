@@ -1,4 +1,3 @@
-const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKfd3ZS71zBy8ITDTAm6dacxsqGbZR9qwSWhXiKxAFSpH6RqnN65jeh7/exec";
 <!DOCTYPE html>
 <html lang="hi" class="dark">
 <head>
@@ -145,7 +144,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
                         <input type="tel" id="user-phone" placeholder="10-digit mobile number" class="w-full mt-1 px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition">
                     </div>
                 </div>
-                <button onclick="submitApprovalRequest()" class="w-full py-3 ai-glow-btn text-white font-semibold rounded-xl text-sm transition flex items-center justify-center gap-2">
+                <button onclick="submitApprovalRequest()" id="submit-req-btn" class="w-full py-3 ai-glow-btn text-white font-semibold rounded-xl text-sm transition flex items-center justify-center gap-2">
                     <span data-i18n="sendReqBtn">Access Request Bhejein</span>
                     <i class="fa-solid fa-arrow-right text-xs"></i>
                 </button>
@@ -519,7 +518,11 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
     <!-- Audio Beep -->
     <audio id="beep-audio" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
+    <!-- App JavaScript -->
     <script>
+        // Connected Google Apps Script Web App URL
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKfd3ZS71zBy8ITDTAm6dacxsqGbZR9qwSWhXiKxAFSpH6RqnM65jeh7/exec";
+
         // Pre-loaded Official Default Structured Syllabus
         const DEFAULT_RAS_SYLLABUS = {"राजस्थान का इतिहास, कला, संस्कृति, साहित्य, परम्परा एवं विरासत": [{"name": "राजस्थान के प्रागैतिहासिक स्थल पुरापाषाण काल से लेकर ताम्रपाषाण काल तक और कांस्य युग, प्राचीन राजस्थान का समाज और संस्कृति", "completed": false, "difficulty": "medium"}, {"name": "राजस्थान इतिहास के स्रोतः पुरातात्विक, अभिलेखीय, साहित्यिक और मुद्राशास्त्रीय", "completed": false, "difficulty": "medium"}, {"name": "राजस्थान के मुख्य राजवंशों के प्रमुख शासकों की राजनीतिक एवं सांस्कृतिक उपलब्धियाँ, केंद्रीय सत्ता के साथ सहयोग एवं प्रतिरोध, मध्यकालीन राजस्थान में प्रशासनिक एवं राजस्व व्यवस्था", "completed": false, "difficulty": "medium"}, {"name": "18वीं–19वीं शताब्दी में राजनीतिक और सामाजिक स्थिति, 20वीं शताब्दी में किसान और आदिवासी आंदोलन, प्रजा मंडल आंदोलन और जन जागृति, राजस्थान का एकीकरण", "completed": false, "difficulty": "medium"}, {"name": "राजस्थान की स्थापत्य परंपराएँ – मंदिर, किले, महल, स्मारक, मानव निर्मित जलाशय, चित्रकला और हस्तशिल्प की विभिन्न शैलियाँ; प्रदर्शन कलाएँ: लोक नृत्य और नाटक, संगीत (शास्त्रीय और लोक) और वाद्ययंत्र", "completed": false, "difficulty": "medium"}, {"name": "भाषा एवं साहित्यः राजस्थानी भाषा की बोलियाँ, राजस्थानी भाषा का साहित्य और लोक साहित्य, धार्मिक जीवनः राजस्थान में धार्मिक समुदाय, संत और संप्रदाय, राजस्थान के लोक देवता और धार्मिक प्रथाएँ", "completed": false, "difficulty": "medium"}, {"name": "राजस्थान में सामाजिक जीवनः मेले और त्यौहार; सामाजिक रीति–रिवाज और परंपराएँ, वेशभूषा और आभूषण", "completed": false, "difficulty": "medium"}, {"name": "राजस्थान के प्रमुख व्यक्तित्व", "completed": false, "difficulty": "medium"}], "भारत का इतिहास प्राचीनकाल एवं मध्यकाल": [{"name": "भारत के सांस्कृतिक आधार- सिंधु और वैदिक युगः छठी शताब्दी ईसा पूर्व के धार्मिक विचार आजीवक, बौद्ध और जैन धर्म।", "completed": false, "difficulty": "medium"}, {"name": "मुख्य राजवंशों के प्रमुख शासकों की उपलब्धियाँ: मौर्य, कुषाण, सातवाहन, गुप्त, चालुक्य, पल्लव और चोल।", "completed": false, "difficulty": "medium"}, {"name": "प्राचीन भारत में कला एवं स्थापत्य कला एवं वैज्ञानिक विकास", "completed": false, "difficulty": "medium"}, {"name": "भारतीय ज्ञान एवं मूल्य व्यवस्थाः वर्णाश्रम, पुरुषार्थ, संस्कार, दर्शन एवं शिक्षा व्यवस्था।", "completed": false, "difficulty": "medium"}, {"name": "सल्तनत कालः प्रमुख राजवंशों की उपलब्धियाँ, विजयनगर साम्राज्य की राजनीतिक और सांस्कृतिक उपलब्धियाँ।", "completed": false, "difficulty": "medium"}, {"name": "मुगल कालः प्रशासन एवं विभिन्न नीतियांः मराठा", "completed": false, "difficulty": "medium"}, {"name": "मध्यकाल में कला एवं वास्तुकला, साहित्य, चित्रकला और संगीत का विकास।", "completed": false, "difficulty": "medium"}, {"name": "धार्मिक आंदोलन और भक्ति एवं सूफी आंदोलन का योगदान।", "completed": false, "difficulty": "medium"}], "आधुनिक काल (प्रारंभिक 19वीं शताब्दी से 2000 तक)": [{"name": "ब्रिटिश साम्राज्यवाद और प्रतिरोध – मराठा, मैसूर, सिख। 1857 का विद्रोह। ब्रिटिश राजनीतिक, आर्थिक और प्रशासनिक नीतियाँ। राष्ट्रवाद का उदय, सामाजिक–धार्मिक आंदोलन।", "completed": false, "difficulty": "medium"}, {"name": "स्वतंत्रता संग्राम और भारतीय राष्ट्रीय आंदोलन– विकास, चरण और प्रमुख घटनाएँ। क्रांतिकारी और विभिन्न क्षेत्रीय आंदोलन। स्वतंत्रता और विभाजन की ओर।", "completed": false, "difficulty": "medium"}, {"name": "स्वातंत्र्योत्तर राष्ट्र निर्माण (2000 तक), राज्य पुनर्गठन, नेहरू युग में सांस्थानिक निर्माण, योजना एवं आर्थिक सुधार, विज्ञान एवं प्रौद्योगिकी का विकास", "completed": false, "difficulty": "medium"}], "विश्व का भूगोल": [{"name": "भौतिक स्वरूपः– पर्वत, पठार, मैदान एवं मरूस्थल", "completed": false, "difficulty": "medium"}, {"name": "प्रमुख नदियाँ एवं झीलें", "completed": false, "difficulty": "medium"}, {"name": "प्राकृतिक वनस्पति", "completed": false, "difficulty": "medium"}, {"name": "कृषि -प्रकार, वितरण तथा प्रमुख फसलें", "completed": false, "difficulty": "medium"}, {"name": "प्रमुख औद्योगिक प्रदेश तथा प्रमुख उद्योग", "completed": false, "difficulty": "medium"}, {"name": "परिवहन तन्त्र", "completed": false, "difficulty": "medium"}, {"name": "पर्यावरणीय मुद्दे – मरूस्थलीकरण, वनोन्मूलन, जलवायु परिवर्तन एवं ग्लोबल वार्मिंग (वैश्विक तापन), ओजोन अवक्षय", "completed": false, "difficulty": "medium"}], "भारत का भूगोल": [{"name": "भौतिक विभाग", "completed": false, "difficulty": "medium"}, {"name": "जलवायु", "completed": false, "difficulty": "medium"}, {"name": "प्रमुख नदियाँ एवं झीलें", "completed": false, "difficulty": "medium"}, {"name": "सिंचाई", "completed": false, "difficulty": "medium"}, {"name": "कृषि : प्रमुख फसलें", "completed": false, "difficulty": "medium"}, {"name": "खनिजः धात्विक और अधात्विक", "completed": false, "difficulty": "medium"}, {"name": "प्रमुख औद्योगिक प्रदेश तथा प्रमुख उद्योग", "completed": false, "difficulty": "medium"}], "राजस्थान का भूगोल": [{"name": "राजस्थानः– अवस्थिति, विस्तार तथा भौतिक विभाग", "completed": false, "difficulty": "medium"}, {"name": "नदियाँ एवं झीलें", "completed": false, "difficulty": "medium"}, {"name": "जलवायु की विशेषताएं", "completed": false, "difficulty": "medium"}, {"name": "प्राकृतिक वनस्पति, जैव विविधता तथा संरक्षण", "completed": false, "difficulty": "medium"}, {"name": "मृदा", "completed": false, "difficulty": "medium"}, {"name": "कृषि", "completed": false, "difficulty": "medium"}, {"name": "पशुधन", "completed": false, "difficulty": "medium"}, {"name": "सिंचाई", "completed": false, "difficulty": "medium"}, {"name": "जनसंख्या– वृद्धि, घनत्व, साक्षरता, लिंगानुपात", "completed": false, "difficulty": "medium"}, {"name": "नगरीकरण", "completed": false, "difficulty": "medium"}, {"name": "जनजातियाँ", "completed": false, "difficulty": "medium"}, {"name": "खनिज– धात्विक एवं अधात्विक", "completed": false, "difficulty": "medium"}, {"name": "पर्यटन", "completed": false, "difficulty": "medium"}], "भारतीय संविधान, राजनीतिक व्यवस्था और शासन": [{"name": "संविधान का निर्माण, उद्देशिका, नागरिकता, मौलिक अधिकार, राज्य की नीति के निदेशक तत्व और मौलिक कर्तव्य", "completed": false, "difficulty": "medium"}, {"name": "संघीय सरकार– कार्यपालिका, विधायिका और न्यायपालिका", "completed": false, "difficulty": "medium"}, {"name": "संघ राज्य संबंध, आपातकालीन प्रावधान", "completed": false, "difficulty": "medium"}, {"name": "शहरी और ग्रामीण स्थानीय सरकार", "completed": false, "difficulty": "medium"}, {"name": "निर्वाचन आयोग, संघ लोक सेवा आयोग, राष्ट्रीय मानवाधिकार आयोग, राष्ट्रीय महिला आयोग, राष्ट्रीय बाल अधिकार संरक्षण आयोग और नीति आयोग", "completed": false, "difficulty": "medium"}, {"name": "लोक नीति, नागरिक चार्टर, सामाजिक अंकेक्षण और शिकायत निवारण प्रणाली", "completed": false, "difficulty": "medium"}, {"name": "लोकपाल, केंद्रीय सतर्कता आयोग, केंद्रीय सूचना आयोग", "completed": false, "difficulty": "medium"}], "राजस्थान की राजनीतिक एवं प्रशासनिक व्यवस्था": [{"name": "राज्यपाल, मुख्यमंत्री एवं मंत्रिपरिषद, राजस्थान विधान सभा, राजस्थान उच्च न्यायालय, अधीनस्थ न्यायालय एवं अन्य न्यायिक निकाय, महाधिवक्ता", "completed": false, "difficulty": "medium"}, {"name": "मुख्य सचिव, राज्य सचिवालय, विभिन्न विभागों के निदेशालय, संभागीय आयुक्त, जिला कलेक्टर / जिला मजिस्ट्रेट, पुलिस अधीक्षक, उप–खण्ड अधिकारी, तहसीलदार", "completed": false, "difficulty": "medium"}, {"name": "राजस्थान लोक सेवा आयोग, राजस्थान राज्य निर्वाचन आयोग, राजस्थान सूचना आयोग, राजस्थान राज्य महिला आयोग, राजस्व मंडल, लोकायुक्त", "completed": false, "difficulty": "medium"}, {"name": "राजस्थान में पंचायती राज एवं नगर पालिकाओं का प्रशासन", "completed": false, "difficulty": "medium"}], "आर्थिक अवधारणाएँ एवं भारतीय अर्थव्यवस्था": [{"name": "आर्थिक संवृद्धि और विकास। पर्यावरण क्षरण और सतत् विकास।", "completed": false, "difficulty": "medium"}, {"name": "विकास के मापक– पारंपरिक माप, मानव विकास सूचकांक और अन्य संबंधित सूचकांक।", "completed": false, "difficulty": "medium"}, {"name": "आर्थिक विकास में मौद्रिक और राजकोषीय नीति की भूमिका। भारत सरकार का नवीनतम बजट और संसाधन संग्रहण।", "completed": false, "difficulty": "medium"}, {"name": "राजकोषीय संघवाद– केन्द्र– राज्य वित्तीय संबंध और वित्त आयोग।", "completed": false, "difficulty": "medium"}, {"name": "कृषिगत विकास– संस्थागत और तकनीकी पहलू। भारतीय कृषि में सुधार–चुनौतियां और सरकारी पहल।", "completed": false, "difficulty": "medium"}, {"name": "औद्योगिक वृद्धि, स्वरूप, नीति और औद्योगिक सुधार– उदारीकरण, निजीकरण और वैश्वीकरण।", "completed": false, "difficulty": "medium"}, {"name": "आर्थिक वृद्धि में सेवा क्षेत्र की भूमिका– चुनौतियां और अवसर। ऊर्जा, परिवहन और संचार।", "completed": false, "difficulty": "medium"}, {"name": "कौशल विकास और रोजगार संवर्द्धन– कार्यक्रम और नीतियां। सामाजिक न्याय और सशक्तिकरण", "completed": false, "difficulty": "medium"}], "राजस्थान की अर्थव्यवस्था": [{"name": "अर्थव्यवस्था का वृहत् परिदृश्य और राज्य बजट।", "completed": false, "difficulty": "medium"}, {"name": "कृषि, उद्योग और सेवा क्षेत्र की मौजूदा स्थिति, मुद्दे और सरकारी पहल।", "completed": false, "difficulty": "medium"}, {"name": "आधारभूत संरचना का विकासः ऊर्जा, परिवहन और संचार।", "completed": false, "difficulty": "medium"}, {"name": "ग्रामीण विकास, पंचायती राज और राज्य वित्त आयोग।", "completed": false, "difficulty": "medium"}, {"name": "मूलभूत सामाजिक सेवाएं– शिक्षा और स्वास्थ्य।", "completed": false, "difficulty": "medium"}, {"name": "राजस्थान सरकार की मुख्य कल्याणकारी योजनाएं।", "completed": false, "difficulty": "medium"}], "विज्ञान एवं प्रौद्योगिकी": [{"name": "दैनिक जीवन में विज्ञान के मूलभूत तत्व।", "completed": false, "difficulty": "medium"}, {"name": "कम्प्यूटर्स; सूचना एवं संचार प्रौद्योगिकी।", "completed": false, "difficulty": "medium"}, {"name": "रक्षा एवं अंतरिक्ष प्रौद्योगिकी भारत के विशेष संदर्भ में।", "completed": false, "difficulty": "medium"}, {"name": "वंशागति एवं विभिन्नता; अनुवांशिक–अभियांत्रिकी; जैव–प्रौद्योगिकी एवं नैनो–प्रौद्योगिकी।", "completed": false, "difficulty": "medium"}, {"name": "मानव स्वास्थ्य देखभाल; आहार एवं पोषण; रोग एवं सार्वजनिक स्वास्थ्य कार्यक्रम।", "completed": false, "difficulty": "medium"}, {"name": "पर्यावरणीय तथा पारिस्थितिकीय परिवर्तन एवं उनका प्रभाव मूल्यांकन।", "completed": false, "difficulty": "medium"}, {"name": "जैव–विविधता; प्राकृतिक संसाधनों का संरक्षण एवं संतत् विकास।", "completed": false, "difficulty": "medium"}, {"name": "राजस्थान के विशेष संदर्भ में कृषि–विज्ञान, उद्यान–विज्ञान, वानिकी एवं पशुपालन।", "completed": false, "difficulty": "medium"}, {"name": "राजस्थान तथा भारत में विज्ञान एवं प्रौद्योगिकी से संबंधित प्रमुख सरकारी कार्यक्रम एवं नीतियां।", "completed": false, "difficulty": "medium"}, {"name": "अभिनव वैज्ञानिक एवं प्रौद्योगिकी प्रगति; विज्ञान एवं प्रौद्योगिकी में भारतीयों का योगदान; विज्ञान एवं प्रौद्योगिकी का स्वदेशीकरण।", "completed": false, "difficulty": "medium"}], "तार्किक दक्षता (निगमनात्मक, आगमनात्मक, अपवर्तनात्मक)": [{"name": "कथन एवं मान्यताएं", "completed": false, "difficulty": "medium"}, {"name": "कथन एवं तर्क", "completed": false, "difficulty": "medium"}, {"name": "कथन एवं निष्कर्ष", "completed": false, "difficulty": "medium"}, {"name": "कथन–कार्यवाही", "completed": false, "difficulty": "medium"}, {"name": "विश्लेषणात्मक तर्कक्षमता / विवेचनात्मक तर्कक्षमता", "completed": false, "difficulty": "medium"}], "मानसिक योग्यता": [{"name": "संख्या / अक्षर अनुक्रम", "completed": false, "difficulty": "medium"}, {"name": "कूटवाचन (कोडिंग–डीकोडिंग)", "completed": false, "difficulty": "medium"}, {"name": "संबंधों से संबंधित समस्याएं", "completed": false, "difficulty": "medium"}, {"name": "दिशा ज्ञान परीक्षण", "completed": false, "difficulty": "medium"}, {"name": "तार्किक वेन आरेख", "completed": false, "difficulty": "medium"}, {"name": "रैंकिंग एवं बैठक व्यवस्था", "completed": false, "difficulty": "medium"}, {"name": "आकार और उनके उपविभाजन", "completed": false, "difficulty": "medium"}], "आधारभूत संख्यात्मक दक्षता": [{"name": "अनुपात–समानुपात तथा साझा, लाभ एवं हानि", "completed": false, "difficulty": "medium"}, {"name": "प्रतिशत", "completed": false, "difficulty": "medium"}, {"name": "साधारण एवं चक्रवृद्धि ब्याज", "completed": false, "difficulty": "medium"}, {"name": "समतलीय चित्रों के परिमाप एवं क्षेत्र", "completed": false, "difficulty": "medium"}, {"name": "आंकड़ों का विश्लेषण (सारणी, दण्ड–आरेख, रेखीय आलेख, पाई–चार्ट)", "completed": false, "difficulty": "medium"}, {"name": "माध्य (समांतर, गुणोत्तर एवं हरात्मक), माध्यिका एवं बहुलक", "completed": false, "difficulty": "medium"}, {"name": "क्रमचय एवं संचय", "completed": false, "difficulty": "medium"}, {"name": "प्रायिकता (सरल समस्याएं)", "completed": false, "difficulty": "medium"}], "समसामयिक घटनाएँ एवं मुद्दे (राजस्थान के विशेष संदर्भ में)": [{"name": "महत्वपूर्ण व्यक्तित्व, स्थान और प्रासंगिक समकालीन मुद्दे", "completed": false, "difficulty": "medium"}, {"name": "कल्याण और विकास से संबंधित नई योजनाएँ, कार्यक्रम और पहल", "completed": false, "difficulty": "medium"}, {"name": "प्रमुख आर्थिक और राजनीतिक घटनाक्रम", "completed": false, "difficulty": "medium"}, {"name": "खेल और क्रीड़ा से संबंधित महत्वपूर्ण घटनाएँ एवं उपलब्धियाँ", "completed": false, "difficulty": "medium"}, {"name": "प्रमुख पुरस्कार, प्रकाशन और प्रतिष्ठित लेखक", "completed": false, "difficulty": "medium"}, {"name": "राजस्थान सार्वजनिक परीक्षा (भर्ती में अनुचित साधनों की रोकथाम के अध्युपाय) अधिनियम, 2022", "completed": false, "difficulty": "medium"}]};
 
@@ -745,7 +748,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             document.getElementById(`tab-btn-${tabId}`).className = 'py-2.5 rounded-xl active-ai-tab transition flex items-center justify-center gap-2';
         }
 
-        // Approval
+        // Device Approval
         function getDeviceId() {
             let id = localStorage.getItem('iaf_device_id');
             if (!id) {
@@ -770,27 +773,44 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             }
         }
 
+        // Submit Approval Request: Saves to Cloud Google Sheet + Local fallback
         function submitApprovalRequest() {
             const name = document.getElementById('user-name').value.trim();
             const phone = document.getElementById('user-phone').value.trim();
             if (!name || !phone) {
-                alert('Kripya apna naam aur phone number dono bharein.');
+                alert('कृपया अपना नाम और मोबाइल नंबर दोनों भरें।');
                 return;
             }
 
+            const btn = document.getElementById('submit-req-btn');
+            btn.innerHTML = '<span>रिक्वेस्ट भेजी जा रही है...</span>';
+
             const deviceId = getDeviceId();
             const requestObj = {
-                deviceId,
-                name,
-                phone,
+                action: "register",
+                deviceId: deviceId,
+                name: name,
+                phone: phone,
                 amount: APP_CONFIG.subscriptionFee,
-                date: new Date().toLocaleDateString(),
-                status: 'pending'
+                date: new Date().toLocaleDateString('hi-IN')
             };
 
+            // 1. Post to Google Sheet Cloud Webhook
+            fetch(GOOGLE_SHEET_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestObj)
+            }).then(() => {
+                console.log("Sheet me live request submit ho gayi.");
+            }).catch(err => {
+                console.error("Cloud send error:", err);
+            });
+
+            // 2. Local fallback
             let allReqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
             allReqs = allReqs.filter(r => r.deviceId !== deviceId);
-            allReqs.push(requestObj);
+            allReqs.push({ ...requestObj, status: 'pending' });
             localStorage.setItem('iaf_all_requests', JSON.stringify(allReqs));
 
             localStorage.setItem('iaf_req_sent', 'true');
@@ -800,34 +820,60 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
 
         function copyUpiId() {
             navigator.clipboard.writeText(APP_CONFIG.upiId);
-            alert('UPI ID copy kar li gayi hai: ' + APP_CONFIG.upiId);
+            alert('UPI ID कॉपी हो गई है: ' + APP_CONFIG.upiId);
         }
 
+        // Check Status: Checks from Live Google Sheet
         function checkStatusManual() {
             const deviceId = getDeviceId();
-            let allReqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
-            const myReq = allReqs.find(r => r.deviceId === deviceId);
-
-            if (myReq && myReq.status === 'approved') {
-                localStorage.setItem('iaf_user_approved', 'true');
-                document.getElementById('device-lock-screen').classList.add('hidden');
-                alert('Badhai ho! Aapka access approve aur activate ho gaya hai.');
-            } else {
-                alert('Abhi approval pending hai. Kripya thoda intezar karein ya admin se sampark karein.');
-            }
+            
+            // Check Google Sheet Live
+            fetch(GOOGLE_SHEET_URL)
+                .then(res => res.json())
+                .then(cloudUsers => {
+                    const myRecord = cloudUsers.find(u => u.deviceId === deviceId);
+                    if (myRecord && myRecord.status === 'approved') {
+                        localStorage.setItem('iaf_user_approved', 'true');
+                        document.getElementById('device-lock-screen').classList.add('hidden');
+                        alert('बधाई हो! आपका सब्सक्रिप्शन एक्टिवेट हो गया है।');
+                    } else {
+                        // Fallback check local
+                        let allReqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
+                        const localRec = allReqs.find(r => r.deviceId === deviceId);
+                        if (localRec && localRec.status === 'approved') {
+                            localStorage.setItem('iaf_user_approved', 'true');
+                            document.getElementById('device-lock-screen').classList.add('hidden');
+                            alert('बधाई हो! आपका सब्सक्रिप्शन एक्टिवेट हो गया है।');
+                        } else {
+                            alert('अभी अप्रूवल पेंडिंग है। पेमेंट की पुष्टि होने पर एडमिन द्वारा एक्टिवेट कर दिया जाएगा।');
+                        }
+                    }
+                })
+                .catch(err => {
+                    // Fallback
+                    let allReqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
+                    const myReq = allReqs.find(r => r.deviceId === deviceId);
+                    if (myReq && myReq.status === 'approved') {
+                        localStorage.setItem('iaf_user_approved', 'true');
+                        document.getElementById('device-lock-screen').classList.add('hidden');
+                        alert('बधाई हो! आपका सब्सक्रिप्शन एक्टिवेट हो गया है।');
+                    } else {
+                        alert('अभी अप्रूवल पेंडिंग है। पेमेंट की पुष्टि होने पर एडमिन द्वारा एक्टिवेट कर दिया जाएगा।');
+                    }
+                });
         }
 
         // Syllabus Handling & Defaults
         function restoreDefaultRASSyllabus() {
-            if (confirm('Kya aap default structured syllabus restore karna chahte hain?')) {
+            if (confirm('क्या आप डिफ़ॉल्ट सिलेबस रीस्टोर करना चाहते हैं?')) {
                 syllabusData = JSON.parse(JSON.stringify(DEFAULT_RAS_SYLLABUS));
                 saveSyllabus();
-                alert('Default syllabus successfully restore ho gaya!');
+                alert('डिफ़ॉल्ट सिलेबस सफलतापूर्वक रीस्टोर हो गया!');
             }
         }
 
         function loadSyllabusFromStorage() {
-            const data = localStorage.getItem('iaf_syllabus_data');
+            const data = localStorage.getItem('iaf_syllabus_data_v2');
             if (data && data !== '{}') {
                 try {
                     syllabusData = JSON.parse(data);
@@ -836,7 +882,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
                 }
             } else {
                 syllabusData = JSON.parse(JSON.stringify(DEFAULT_RAS_SYLLABUS));
-                localStorage.setItem('iaf_syllabus_data', JSON.stringify(syllabusData));
+                localStorage.setItem('iaf_syllabus_data_v2', JSON.stringify(syllabusData));
             }
             populateSubjectDropdown();
             renderSyllabusDirectory();
@@ -844,14 +890,14 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
         }
 
         function saveSyllabus() {
-            localStorage.setItem('iaf_syllabus_data', JSON.stringify(syllabusData));
+            localStorage.setItem('iaf_syllabus_data_v2', JSON.stringify(syllabusData));
             populateSubjectDropdown();
             renderSyllabusDirectory();
             updateProgressStats();
         }
 
         function clearAllSyllabus() {
-            if (confirm('Kya aap pura syllabus hatana chahte hain?')) {
+            if (confirm('क्या आप सच में पूरा सिलेबस हटाना चाहते हैं?')) {
                 syllabusData = {};
                 saveSyllabus();
             }
@@ -861,7 +907,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             const subj = document.getElementById('custom-subject-input').value.trim();
             const topic = document.getElementById('custom-topic-input').value.trim();
             if (!subj || !topic) {
-                alert('Kripya vishay aur sub-topic dono bharein.');
+                alert('कृपया विषय और सब-टॉपिक दोनों का नाम भरें।');
                 return;
             }
             if (!syllabusData[subj]) syllabusData[subj] = [];
@@ -872,11 +918,11 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             });
             saveSyllabus();
             document.getElementById('custom-topic-input').value = '';
-            alert(`'${topic}' ko successfully joda gaya!`);
+            alert(`'${topic}' को '${subj}' में सफलतापूर्वक जोड़ दिया गया!`);
         }
 
         function deleteSubTopic(subject, topicName) {
-            if (confirm(`Kya aap '${topicName}' ko delete karna chahte hain?`)) {
+            if (confirm(`क्या आप '${topicName}' को हटाना चाहते हैं?`)) {
                 if (syllabusData[subject]) {
                     syllabusData[subject] = syllabusData[subject].filter(t => t.name !== topicName);
                     if (syllabusData[subject].length === 0) {
@@ -889,7 +935,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
 
         function parseSyllabusText(rawText) {
             const lines = rawText.split('\n');
-            let currentSubject = "General Studies";
+            let currentSubject = "सामान्य अध्ययन";
 
             lines.forEach(line => {
                 let clean = line.trim();
@@ -920,7 +966,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             if (!text) return;
             parseSyllabusText(text);
             document.getElementById('raw-syllabus-input').value = '';
-            alert('Syllabus successfully update ho gaya!');
+            alert('सिलेबस सफलतापूर्वक अपडेट और स्ट्रक्चर हो गया!');
         }
 
         function handleWordUpload(e) {
@@ -932,9 +978,9 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
                 mammoth.extractRawText({ arrayBuffer: event.target.result })
                     .then(result => {
                         parseSyllabusText(result.value);
-                        alert(`Word document '${file.name}' se syllabus update ho gaya!`);
+                        alert(`Word फाइल '${file.name}' से सिलेबस सफलतापूर्वक अपडेट हो गया!`);
                     })
-                    .catch(err => alert('Word file read karne me error: ' + err.message));
+                    .catch(err => alert('Word फाइल पार्स करने में त्रुटि: ' + err.message));
             };
             reader.readAsArrayBuffer(file);
         }
@@ -945,7 +991,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             const subjects = Object.keys(syllabusData);
 
             if (subjects.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 italic p-4 text-center">Koi syllabus maujood nahi hai. Upar se restore karein.</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-500 italic p-4 text-center">कोई सिलेबस मौजूद नहीं है। ऊपर से रीस्टोर करें।</p>`;
                 return;
             }
 
@@ -1025,7 +1071,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             const type = document.getElementById('sched-type').value;
 
             if (!subject || !topic) {
-                alert('Kripya subject aur sub-topic dono chunein.');
+                alert('कृपया विषय और सब-टॉपिक दोनों चुनें।');
                 return;
             }
 
@@ -1040,7 +1086,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
 
             scheduledTasks.push(task);
             saveScheduledTasks();
-            alert(`'${topic}' schedule me add kar diya gaya!`);
+            alert(`'${topic}' को सफलतापूर्वक शेड्यूल में जोड़ दिया गया!`);
         }
 
         function saveScheduledTasks() {
@@ -1071,13 +1117,13 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             document.getElementById('rev-badge-count').innerText = `${todayRev.length} Revisions`;
 
             if (todayStudy.length === 0) {
-                studyContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">Aaj ke liye koi mukhya topic scheduled nahi hai.</p>`;
+                studyContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">आज के लिए कोई मुख्य विषय शेड्यूल नहीं है।</p>`;
             } else {
                 todayStudy.forEach(t => studyContainer.appendChild(createTaskCard(t)));
             }
 
             if (todayRev.length === 0) {
-                revContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">Aaj revision ke liye koi topic pending nahi hai.</p>`;
+                revContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">आज रिवीज़न के लिए कोई टॉपिक पेंडिंग नहीं है।</p>`;
             } else {
                 todayRev.forEach(t => revContainer.appendChild(createTaskCard(t)));
             }
@@ -1119,14 +1165,14 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             }
 
             if (task.completed && task.type === 'study') {
-                if (confirm(`'${task.topic}' complete hua! Kya ise 1-3-7-21 scientific revision me auto-schedule karna chahte hain?`)) {
+                if (confirm(`'${task.topic}' पूर्ण हुआ! क्या इसे 1-3-7-21 वैज्ञानिक रिवीज़न में स्वतः जोड़ना चाहते हैं?`)) {
                     [1, 3, 7, 21].forEach(days => {
                         const futureDate = new Date();
                         futureDate.setDate(futureDate.getDate() + days);
                         scheduledTasks.push({
                             id: 'REV-' + Date.now() + '-' + days,
                             subject: task.subject,
-                            topic: `${task.topic} (${days} Day Revision)`,
+                            topic: `${task.topic} (${days} दिन रिवीज़न)`,
                             datetime: futureDate.toISOString(),
                             type: 'revision',
                             completed: false
@@ -1177,7 +1223,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             });
 
             if (allTopics.length === 0) {
-                alert('Syllabus me koi pending topic nahi mila!');
+                alert('सिलेबस में कोई पेंडिंग टॉपिक नहीं मिला!');
                 return;
             }
 
@@ -1214,7 +1260,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
                         <span class="font-bold text-cyan-300 bg-cyan-950/40 px-2.5 py-1 rounded-xl border border-cyan-500/30 font-mono">${p.displayDate}</span>
                         <div>
                             <span class="font-bold text-white">${p.topic}</span>
-                            <div class="text-[11px] text-slate-400">${p.subject} • ${p.duration} Min Session</div>
+                            <div class="text-[11px] text-slate-400">${p.subject} • ${p.duration} मिनट सेशन</div>
                         </div>
                     </div>
                     <span class="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded font-medium">Scheduled</span>
@@ -1240,7 +1286,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             });
 
             saveScheduledTasks();
-            alert('Time table successfully apply ho gaya!');
+            alert('पूरा टाइम टेबल आपके मुख्य डैशबोर्ड शेड्यूल में सफलतापूर्वक लागू हो गया!');
             switchTab('dashboard');
         }
 
@@ -1261,7 +1307,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
                         clearInterval(timerInterval);
                         isTimerRunning = false;
                         document.getElementById('beep-audio').play().catch(()=>{});
-                        alert('Pomodoro session complete hua! Break lein.');
+                        alert('पोमोडोरो सेशन पूरा हुआ! अब 5 मिनट का ब्रेक लें।');
                         resetTimer();
                     }
                 }, 1000);

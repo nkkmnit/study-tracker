@@ -1,7 +1,9 @@
 {
   "name": "Indian AI Factory",
   "short_name": "IAF Tracker",
+  "description": "Smart Syllabus & Study Tracker by Indian AI Factory",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0b0f19",
   "theme_color": "#4f46e5",

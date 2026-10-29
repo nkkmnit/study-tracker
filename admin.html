@@ -1,120 +1,182 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="hi" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Portal - Indian AI Factory</title>
+    <title>Indian AI Factory - Secure Admin Portal</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top right, #111827, #0b0f19 75%);
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.78);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(31, 41, 55, 0.45);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .ai-glow-btn {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+        }
+        .ai-glow-btn:hover {
+            background: linear-gradient(135deg, #4338ca, #4f46e5);
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.55);
+        }
+    </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen font-sans">
+<body class="text-slate-200 min-h-screen flex flex-col font-sans">
 
     <!-- Admin Login Screen -->
-    <div id="admin-login-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center border border-slate-200">
-            <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
-                <i class="fa-solid fa-user-shield"></i>
+    <div id="admin-login-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-panel rounded-3xl shadow-2xl max-w-sm w-full p-6 text-center border border-indigo-500/20">
+            <div class="w-14 h-14 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
+                <i class="fa-solid fa-shield-halved"></i>
             </div>
-            <h2 class="text-xl font-bold text-slate-900 mb-1">Admin Portal</h2>
-            <p class="text-xs text-slate-500 mb-6">Indian AI Factory Management</p>
+            <h2 class="text-xl font-bold text-white mb-1">Admin Portal</h2>
+            <p class="text-xs text-indigo-300 mb-6">Indian AI Factory Management</p>
 
             <div class="space-y-4 text-left">
                 <div>
-                    <label class="text-xs font-semibold text-slate-600">Master PIN</label>
-                    <input type="password" id="admin-pin" placeholder="Enter PIN (Default: 9999)" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <label class="text-xs font-semibold text-slate-400">Master PIN</label>
+                    <input type="password" id="admin-pin" placeholder="Enter PIN (Default: 9999)" class="w-full mt-1 px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:border-indigo-500 outline-none">
                 </div>
-                <button onclick="verifyAdminPin()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition shadow-md">
+                <button onclick="verifyAdminPin()" class="w-full py-2.5 ai-glow-btn text-white font-semibold rounded-xl text-sm transition">
                     Login Karein
                 </button>
+                <p class="text-[11px] text-slate-500 text-center">डिफ़ॉल्ट पिन: <strong class="text-indigo-400 font-mono">9999</strong></p>
             </div>
         </div>
     </div>
 
     <!-- Admin Main Dashboard -->
-    <div id="admin-dashboard" class="hidden">
+    <div id="admin-dashboard" class="hidden flex-grow flex flex-col">
         <!-- Top Navigation -->
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <header class="glass-panel border-b border-slate-800 sticky top-0 z-30">
             <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <span class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+                <div class="flex items-center space-x-3">
+                    <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow">
                         IAF
                     </span>
                     <div>
-                        <h1 class="text-base font-bold text-slate-800 leading-tight">Indian AI Factory - Admin Panel</h1>
-                        <p class="text-[11px] text-slate-500 leading-none">Subscription & Access Control</p>
+                        <h1 class="text-base font-bold text-white leading-tight">Indian AI Factory - Admin Panel</h1>
+                        <p class="text-[11px] text-indigo-300 leading-none">Subscription & Access Control</p>
                     </div>
                 </div>
-                <button onclick="adminLogout()" class="text-xs text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg border border-red-200 transition">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
-                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="openChangePinModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-key text-[11px]"></i>
+                        <span>Change PIN</span>
+                    </button>
+                    <button onclick="adminLogout()" class="text-xs text-red-400 hover:text-red-300 bg-red-950/30 hover:bg-red-950/50 px-3 py-1.5 rounded-xl border border-red-500/30 transition">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+                    </button>
+                </div>
             </div>
         </header>
 
         <!-- Main Content -->
-        <main class="max-w-6xl mx-auto px-4 py-6">
+        <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
             <!-- Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Total Requests</p>
-                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-total-requests">0</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="glass-card p-4 rounded-2xl border border-slate-800">
+                    <p class="text-xs font-semibold text-slate-400 uppercase">Total Requests</p>
+                    <h3 class="text-2xl font-black text-white mt-1" id="stat-total-requests">0</h3>
                 </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Approved Users</p>
-                    <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="stat-approved-requests">0</h3>
+                <div class="glass-card p-4 rounded-2xl border border-emerald-500/20">
+                    <p class="text-xs font-semibold text-emerald-400 uppercase">Approved Users</p>
+                    <h3 class="text-2xl font-black text-emerald-300 mt-1" id="stat-approved-requests">0</h3>
                 </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Pending Requests</p>
-                    <h3 class="text-2xl font-bold text-amber-500 mt-1" id="stat-pending-requests">0</h3>
+                <div class="glass-card p-4 rounded-2xl border border-amber-500/20">
+                    <p class="text-xs font-semibold text-amber-400 uppercase">Pending Requests</p>
+                    <h3 class="text-2xl font-black text-amber-300 mt-1" id="stat-pending-requests">0</h3>
                 </div>
             </div>
 
             <!-- Request Table -->
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-slate-200 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-users text-indigo-600"></i> User Access Requests
+            <div class="glass-panel rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+                <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-users text-indigo-400"></i> User Access Requests
                     </h3>
-                    <button onclick="loadRequests()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg border transition">
-                        <i class="fa-solid fa-rotate-right mr-1"></i> Refresh List
+                    <button onclick="loadRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate-right"></i> Refresh List
                     </button>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-600">
-                        <thead class="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold uppercase">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-900/80 border-b border-slate-800 text-slate-400 font-semibold uppercase">
                             <tr>
-                                <th class="p-3">User Details</th>
-                                <th class="p-3">Device Code</th>
-                                <th class="p-3">Amount</th>
-                                <th class="p-3">Request Date</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 text-center">Actions</th>
+                                <th class="p-3.5">User Details</th>
+                                <th class="p-3.5">Device Code</th>
+                                <th class="p-3.5">Amount</th>
+                                <th class="p-3.5">Request Date</th>
+                                <th class="p-3.5">Status</th>
+                                <th class="p-3.5 text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="request-table-body" class="divide-y divide-slate-100">
+                        <tbody id="request-table-body" class="divide-y divide-slate-800/80">
                             <tr>
-                                <td colspan="6" class="p-4 text-center text-slate-400">Loading requests...</td>
+                                <td colspan="6" class="p-4 text-center text-slate-500">Loading requests...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </main>
+
+        <footer class="glass-panel border-t border-slate-800 py-3 text-center text-xs text-slate-500 mt-auto">
+            Secure Admin Access • Indian AI Factory
+        </footer>
     </div>
 
-    <!-- Admin Logic -->
+    <!-- Change PIN Modal -->
+    <div id="change-pin-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl max-w-xs w-full p-5 border border-slate-700 text-left">
+            <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-key text-indigo-400"></i> Change Master PIN
+            </h3>
+            <div class="space-y-3 text-xs mb-4">
+                <div>
+                    <label class="text-slate-400 block mb-1">Purana PIN</label>
+                    <input type="password" id="old-pin-input" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none">
+                </div>
+                <div>
+                    <label class="text-slate-400 block mb-1">Naya PIN (कम से कम 4 अंक)</label>
+                    <input type="password" id="new-pin-input" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 text-xs">
+                <button onclick="closeChangePinModal()" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+                <button onclick="saveNewAdminPin()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg">Save PIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Script -->
     <script>
-        const ADMIN_PIN = "9999";
+        function getStoredAdminPin() {
+            return localStorage.getItem('iaf_admin_pin') || "9999";
+        }
 
         function verifyAdminPin() {
             const entered = document.getElementById('admin-pin').value;
-            if (entered === ADMIN_PIN) {
+            const validPin = getStoredAdminPin();
+            if (entered === validPin) {
                 document.getElementById('admin-login-modal').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 loadRequests();
             } else {
-                alert('Galat PIN! Kripya sahi master PIN enter karein.');
+                alert('गलत PIN! कृपया सही मास्टर PIN (9999) दर्ज करें।');
             }
         }
 
@@ -122,6 +184,35 @@
             document.getElementById('admin-login-modal').classList.remove('hidden');
             document.getElementById('admin-dashboard').classList.add('hidden');
             document.getElementById('admin-pin').value = '';
+        }
+
+        function openChangePinModal() {
+            document.getElementById('old-pin-input').value = '';
+            document.getElementById('new-pin-input').value = '';
+            document.getElementById('change-pin-modal').classList.remove('hidden');
+        }
+
+        function closeChangePinModal() {
+            document.getElementById('change-pin-modal').classList.add('hidden');
+        }
+
+        function saveNewAdminPin() {
+            const oldPin = document.getElementById('old-pin-input').value;
+            const newPin = document.getElementById('new-pin-input').value.trim();
+            const currentPin = getStoredAdminPin();
+
+            if (oldPin !== currentPin) {
+                alert('पुराना PIN गलत है!');
+                return;
+            }
+            if (!newPin || newPin.length < 4) {
+                alert('नया PIN कम से कम 4 अंकों का होना चाहिए।');
+                return;
+            }
+
+            localStorage.setItem('iaf_admin_pin', newPin);
+            alert('मास्टर PIN सफलतापूर्वक बदल दिया गया है!');
+            closeChangePinModal();
         }
 
         function loadRequests() {
@@ -133,32 +224,32 @@
             document.getElementById('stat-pending-requests').innerText = reqs.filter(r => r.status === 'pending').length;
 
             if (reqs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Abhi koi requests nahi hain.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">अभी कोई अनुरोध मौजूद नहीं है।</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = reqs.map(r => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-3">
-                        <div class="font-medium text-slate-800">${r.name || 'Anonymous'}</div>
+                <tr class="hover:bg-slate-800/40 transition">
+                    <td class="p-3.5">
+                        <div class="font-bold text-white">${r.name || 'Anonymous'}</div>
                         <div class="text-[11px] text-slate-400">${r.phone || 'N/A'}</div>
                     </td>
-                    <td class="p-3 font-mono text-[11px] text-slate-600">${r.deviceId}</td>
-                    <td class="p-3 font-semibold text-slate-700">₹${r.amount || 199}</td>
-                    <td class="p-3 text-slate-500">${r.date || 'N/A'}</td>
-                    <td class="p-3">
+                    <td class="p-3.5 font-mono text-[11px] text-cyan-300 font-bold">${r.deviceId}</td>
+                    <td class="p-3.5 font-bold text-indigo-300">₹${r.amount || 199}</td>
+                    <td class="p-3.5 text-slate-400">${r.date || 'N/A'}</td>
+                    <td class="p-3.5">
                         ${r.status === 'approved' 
-                            ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold text-[10px]">Approved</span>'
-                            : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold text-[10px]">Pending</span>'
+                            ? '<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-semibold text-[10px]">Approved</span>'
+                            : '<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-semibold text-[10px]">Pending</span>'
                         }
                     </td>
-                    <td class="p-3 text-center space-x-1">
+                    <td class="p-3.5 text-center space-x-1.5">
                         ${r.status !== 'approved' ? `
-                            <button onclick="updateStatus('${r.deviceId}', 'approved')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-[11px] transition">
+                            <button onclick="updateStatus('${r.deviceId}', 'approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-xl text-[11px] font-semibold transition shadow">
                                 <i class="fa-solid fa-check mr-1"></i> Approve
                             </button>
                         ` : `
-                            <button onclick="updateStatus('${r.deviceId}', 'pending')" class="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded text-[11px] transition">
+                            <button onclick="updateStatus('${r.deviceId}', 'pending')" class="bg-red-500/80 hover:bg-red-500 text-white px-3 py-1 rounded-xl text-[11px] font-semibold transition">
                                 <i class="fa-solid fa-ban mr-1"></i> Revoke
                             </button>
                         `}
@@ -177,7 +268,7 @@
             });
             localStorage.setItem('iaf_all_requests', JSON.stringify(reqs));
             loadRequests();
-            alert(`Device ${deviceId} status badalkar '${newStatus}' kar diya gaya hai.`);
+            alert(`डिवाइस ${deviceId} का स्टेटस '${newStatus}' कर दिया गया है!`);
         }
     </script>
 </body>

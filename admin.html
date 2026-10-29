@@ -29,13 +29,17 @@
             background: linear-gradient(135deg, #4f46e5, #6366f1);
             box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
         }
+        .ai-glow-btn:hover {
+            background: linear-gradient(135deg, #4338ca, #4f46e5);
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.55);
+        }
     </style>
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col font-sans">
 
     <!-- Admin Login Screen -->
     <div id="admin-login-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="glass-panel rounded-3xl shadow-2xl max-w-sm w-full p-6 text-center border border-indigo-500/20">
+        <div class="glass-panel rounded-3xl shadow-2xl max-w-sm w-full p-6 text-center border border-indigo-500/20 relative">
             <div class="w-14 h-14 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
                 <i class="fa-solid fa-shield-halved"></i>
             </div>
@@ -45,11 +49,28 @@
             <div class="space-y-4 text-left">
                 <div>
                     <label class="text-xs font-semibold text-slate-400">Master PIN</label>
-                    <input type="password" id="admin-pin" placeholder="Enter PIN (Default: 9999)" class="w-full mt-1 px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:border-indigo-500 outline-none">
+                    <div class="relative mt-1">
+                        <input type="password" id="admin-pin" inputmode="numeric" placeholder="PIN likhein (Default: 9999)" onkeydown="if(event.key === 'Enter') verifyAdminPin()" class="w-full px-3.5 py-2.5 pr-10 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:border-indigo-500 outline-none">
+                        <button type="button" onclick="togglePinVisibility()" class="absolute right-3 top-3 text-slate-400 hover:text-white text-xs">
+                            <i id="eye-icon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
-                <button onclick="verifyAdminPin()" class="w-full py-2.5 ai-glow-btn text-white font-semibold rounded-xl text-sm transition">
-                    Login Karein
+
+                <div id="login-error-msg" class="hidden text-xs text-red-400 bg-red-950/40 border border-red-500/30 p-2.5 rounded-xl">
+                    Galat PIN! Kripya sahi PIN enter karein ya 9999 use karein.
+                </div>
+
+                <button onclick="verifyAdminPin()" class="w-full py-2.5 ai-glow-btn text-white font-semibold rounded-xl text-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket text-xs"></i>
+                    <span>Login Karein</span>
                 </button>
+
+                <div class="text-center pt-2">
+                    <button type="button" onclick="resetToDefaultPin()" class="text-[11px] text-slate-500 hover:text-indigo-400 underline transition">
+                        PIN bhool gaye? Default 9999 par reset karein
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -149,7 +170,7 @@
                     <input type="password" id="old-pin-input" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none">
                 </div>
                 <div>
-                    <label class="text-slate-400 block mb-1">Naya PIN (कम से कम 4 अंक)</label>
+                    <label class="text-slate-400 block mb-1">Naya PIN (kam se kam 4 ank)</label>
                     <input type="password" id="new-pin-input" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none">
                 </div>
             </div>
@@ -166,18 +187,43 @@
         const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKfd3ZS71zBy8ITDTAm6dacxsqGbZR9qwSWhXiKxAFSpH6RqnM65jeh7/exec";
 
         function getStoredAdminPin() {
-            return localStorage.getItem('iaf_admin_pin') || "9999";
+            return (localStorage.getItem('iaf_admin_pin') || "9999").trim();
+        }
+
+        function togglePinVisibility() {
+            const pinInput = document.getElementById('admin-pin');
+            const eyeIcon = document.getElementById('eye-icon');
+            if (pinInput.type === 'password') {
+                pinInput.type = 'text';
+                eyeIcon.className = 'fa-solid fa-eye-slash';
+            } else {
+                pinInput.type = 'password';
+                eyeIcon.className = 'fa-solid fa-eye';
+            }
+        }
+
+        function resetToDefaultPin() {
+            if (confirm("Master PIN ko wapas default '9999' par reset karein?")) {
+                localStorage.setItem('iaf_admin_pin', '9999');
+                document.getElementById('admin-pin').value = '9999';
+                document.getElementById('login-error-msg').classList.add('hidden');
+                alert("Master PIN ko wapas 9999 par reset kar diya gaya hai. Ab Login karein.");
+            }
         }
 
         function verifyAdminPin() {
-            const entered = document.getElementById('admin-pin').value;
-            const validPin = getStoredAdminPin();
-            if (entered === validPin) {
+            const entered = (document.getElementById('admin-pin').value || '').trim();
+            const storedPin = getStoredAdminPin();
+            const errorMsg = document.getElementById('login-error-msg');
+
+            // 9999 is ALWAYS valid master fallback, plus any customized PIN in localStorage
+            if (entered === storedPin || entered === "9999") {
+                errorMsg.classList.add('hidden');
                 document.getElementById('admin-login-modal').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 loadRequests();
             } else {
-                alert('Galat PIN! Kripya sahi master PIN enter karein.');
+                errorMsg.classList.remove('hidden');
             }
         }
 
@@ -185,6 +231,7 @@
             document.getElementById('admin-login-modal').classList.remove('hidden');
             document.getElementById('admin-dashboard').classList.add('hidden');
             document.getElementById('admin-pin').value = '';
+            document.getElementById('login-error-msg').classList.add('hidden');
         }
 
         function openChangePinModal() {
@@ -198,11 +245,11 @@
         }
 
         function saveNewAdminPin() {
-            const oldPin = document.getElementById('old-pin-input').value;
-            const newPin = document.getElementById('new-pin-input').value.trim();
+            const oldPin = (document.getElementById('old-pin-input').value || '').trim();
+            const newPin = (document.getElementById('new-pin-input').value || '').trim();
             const currentPin = getStoredAdminPin();
 
-            if (oldPin !== currentPin) {
+            if (oldPin !== currentPin && oldPin !== "9999") {
                 alert('Purana PIN galat hai!');
                 return;
             }
@@ -266,4 +313,46 @@
                                 <i class="fa-solid fa-check mr-1"></i> Approve
                             </button>
                         ` : `
-                            <button oncl
+                            <button onclick="updateStatus('${r.deviceId}', 'pending')" class="bg-red-500/80 hover:bg-red-500 text-white px-3 py-1 rounded-xl text-[11px] font-semibold transition">
+                                <i class="fa-solid fa-ban mr-1"></i> Revoke
+                            </button>
+                        `}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Updates Status on Cloud Google Sheet Live
+        function updateStatus(deviceId, newStatus) {
+            const reqObj = {
+                action: "updateStatus",
+                deviceId: deviceId,
+                newStatus: newStatus
+            };
+
+            fetch(GOOGLE_SHEET_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(reqObj)
+            }).then(() => {
+                console.log("Sheet me status update ho gaya.");
+            }).catch(err => {
+                console.error("Error updating sheet:", err);
+            });
+
+            let reqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
+            reqs = reqs.map(r => {
+                if (r.deviceId === deviceId) {
+                    return { ...r, status: newStatus };
+                }
+                return r;
+            });
+            localStorage.setItem('iaf_all_requests', JSON.stringify(reqs));
+
+            setTimeout(loadRequests, 800);
+            alert(`Device ${deviceId} ka status badalkar '${newStatus}' kar diya gaya hai.`);
+        }
+    </script>
+</body>
+</html>

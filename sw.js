@@ -1,4 +1,4 @@
-const CACHE_NAME = 'iaf-tracker-v2';
+const CACHE_NAME = 'iaf-tracker-v1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

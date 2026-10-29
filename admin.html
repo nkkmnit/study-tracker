@@ -1,4 +1,3 @@
-const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKfd3ZS71zBy8ITDTAm6dacxsqGbZR9qwSWhXiKxAFSpH6RqnN65jeh7/exec";
 <!DOCTYPE html>
 <html lang="hi" class="dark">
 <head>
@@ -103,10 +102,11 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             <div class="glass-panel rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
                 <div class="p-4 border-b border-slate-800 flex justify-between items-center">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-users text-indigo-400"></i> User Access Requests
+                        <i class="fa-solid fa-users text-indigo-400"></i> User Access Requests (Google Sheet Connected)
                     </h3>
-                    <button onclick="loadRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl border border-slate-700 transition">
-                        <i class="fa-solid fa-rotate-right mr-1"></i> Refresh List
+                    <button onclick="loadRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Refresh Sheet List</span>
                     </button>
                 </div>
                 <div class="overflow-x-auto">
@@ -123,7 +123,7 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
                         </thead>
                         <tbody id="request-table-body" class="divide-y divide-slate-800/80">
                             <tr>
-                                <td colspan="6" class="p-4 text-center text-slate-500">Loading requests...</td>
+                                <td colspan="6" class="p-4 text-center text-slate-500">Google Sheet se live requests load ho rahi hain...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -162,6 +162,9 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
 
     <!-- Admin Script -->
     <script>
+        // Connected Google Apps Script Web App URL
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKfd3ZS71zBy8ITDTAm6dacxsqGbZR9qwSWhXiKxAFSpH6RqnM65jeh7/exec";
+
         function getStoredAdminPin() {
             return localStorage.getItem('iaf_admin_pin') || "9999";
         }
@@ -213,8 +216,24 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
             closeChangePinModal();
         }
 
+        // Loads live requests from Cloud Google Sheet
         function loadRequests() {
-            const reqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
+            const tbody = document.getElementById('request-table-body');
+            tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400"><i class="fa-solid fa-spinner animate-spin mr-2"></i>Google Sheet se live requests load ho rahi hain...</td></tr>`;
+
+            fetch(GOOGLE_SHEET_URL)
+                .then(res => res.json())
+                .then(cloudReqs => {
+                    renderRequestTable(cloudReqs);
+                })
+                .catch(err => {
+                    console.error("Sheet load error, fallback to local:", err);
+                    const localReqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
+                    renderRequestTable(localReqs);
+                });
+        }
+
+        function renderRequestTable(reqs) {
             const tbody = document.getElementById('request-table-body');
             
             document.getElementById('stat-total-requests').innerText = reqs.length;
@@ -247,27 +266,4 @@ const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKf
                                 <i class="fa-solid fa-check mr-1"></i> Approve
                             </button>
                         ` : `
-                            <button onclick="updateStatus('${r.deviceId}', 'pending')" class="bg-red-500/80 hover:bg-red-500 text-white px-3 py-1 rounded-xl text-[11px] font-semibold transition">
-                                <i class="fa-solid fa-ban mr-1"></i> Revoke
-                            </button>
-                        `}
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function updateStatus(deviceId, newStatus) {
-            let reqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
-            reqs = reqs.map(r => {
-                if (r.deviceId === deviceId) {
-                    return { ...r, status: newStatus };
-                }
-                return r;
-            });
-            localStorage.setItem('iaf_all_requests', JSON.stringify(reqs));
-            loadRequests();
-            alert(`Device ${deviceId} status badalkar '${newStatus}' kar diya gaya hai.`);
-        }
-    </script>
-</body>
-</html>
+                            <button oncl

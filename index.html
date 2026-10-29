@@ -1,428 +1,986 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="hi" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indian AI Factory - Smart Syllabus & Study Tracker</title>
+    <title>Indian AI Factory - Smart Syllabus Tracker & Admin Suite</title>
     
-    <!-- PWA Meta tags for Chrome Install Icon -->
-    <meta name="theme-color" content="#2563eb">
+    <!-- PWA Meta tags for Mobile Chrome Auto Install Bar -->
+    <meta name="theme-color" content="#4f46e5">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="IAF Tracker">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text x='50' y='68' font-size='50' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>AI</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%234f46e5'/><text x='50' y='68' font-size='50' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>AI</text></svg>">
     
-    <!-- Manifest injected dynamically via JS for single-file PWA support -->
     <link id="manifest-placeholder" rel="manifest">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ai: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#1e1b4b',
+                            dark: '#0b0f19'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Mammoth for Word Docs (.docx) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
     <style>
-        .active-tab {
-            border-bottom: 3px solid #2563eb;
-            color: #2563eb;
-            font-weight: 700;
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', sans-serif;
+            background: radial-gradient(circle at top right, #111827, #0b0f19 75%);
+        }
+
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(31, 41, 55, 0.45);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.35);
+        }
+
+        .active-ai-tab {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.3), rgba(99, 102, 241, 0.15));
+            border-color: rgba(99, 102, 241, 0.6);
+            color: #a5b4fc !important;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+        }
+
+        .ai-glow-btn {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+        }
+        .ai-glow-btn:hover {
+            background: linear-gradient(135deg, #4338ca, #4f46e5);
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.55);
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.6);
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans pb-16">
+<body class="text-slate-200 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white pb-16">
 
-    <!-- 1. Subscription & Approval Lock Screen Overlay -->
-    <div id="device-lock-screen" class="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center border border-slate-200">
-            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
-                <i class="fa-solid fa-graduation-cap"></i>
+    <!-- 0. Live Preview Mode Switcher Bar -->
+    <aside class="bg-slate-950/95 border-b border-indigo-500/30 px-3 sm:px-4 py-2 z-50 sticky top-0 backdrop-blur-md shadow-md">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-bold tracking-wide text-indigo-300">Indian AI Factory • Testing & Live Suite</span>
             </div>
-            <h2 class="text-2xl font-bold text-slate-900 mb-1">Indian AI Factory</h2>
-            <p class="text-xs text-slate-500 mb-5 font-medium tracking-wide">Smart Syllabus & Study Tracker</p>
-
-            <!-- Registration Step -->
-            <div id="step-register">
-                <p class="text-xs text-slate-600 mb-4 text-left">App access pane ke liye apna naam aur mobile number darj karein:</p>
-                <div class="space-y-3 mb-4 text-left">
-                    <div>
-                        <label class="text-xs font-semibold text-slate-700">Aapka Naam</label>
-                        <input type="text" id="user-name" placeholder="Apna pura naam likhein" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold text-slate-700">Mobile Number</label>
-                        <input type="tel" id="user-phone" placeholder="10 anko ka mobile number" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                </div>
-                <button onclick="submitApprovalRequest()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition shadow-md flex items-center justify-center gap-2">
-                    <span>Access Request Bhejein</span>
-                    <i class="fa-solid fa-arrow-right text-xs"></i>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="setPreviewMode('student')" id="preview-btn-student" class="px-3 py-1 rounded-lg font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-graduation-cap"></i> <span>छात्र पोर्टल (App)</span>
+                </button>
+                <button type="button" onclick="setPreviewMode('admin')" id="preview-btn-admin" class="px-3 py-1 rounded-lg font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-shield"></i> <span>एडमिन पैनल (Admin)</span>
+                </button>
+                <button type="button" onclick="toggleLockOverlayPreview()" id="preview-btn-lock" class="px-2.5 py-1 rounded-lg font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition flex items-center gap-1">
+                    <i class="fa-solid fa-lock"></i> <span id="lock-toggle-text">₹199 लॉक स्क्रीन देखें</span>
                 </button>
             </div>
+        </div>
+    </aside>
 
-            <!-- Payment / Approval Waiting Step -->
-            <div id="step-payment" class="hidden text-left">
-                <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg mb-4 text-xs text-amber-800 flex items-start gap-2">
-                    <i class="fa-solid fa-circle-info mt-0.5 text-amber-600"></i>
-                    <div>Aapki request submit ho gayi hai. Access chalu karne ke liye subscription shulk pura karein.</div>
+    <!-- ======================================================== -->
+    <!-- 1. STUDENT APP VIEW (Clean - No admin trace)             -->
+    <!-- ======================================================== -->
+    <div id="student-app-view" class="flex-grow flex flex-col">
+
+        <!-- Mobile Auto Install Prompt Banner -->
+        <div id="pwa-install-banner" class="hidden glass-panel border-b border-indigo-500/30 p-2.5 px-4 sticky top-10 z-40 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                </span>
+                <div class="text-[11px] leading-tight">
+                    <span class="font-bold text-white block" data-i18n="installBannerTitle">App Install Karein</span>
+                    <span class="text-slate-400" data-i18n="installBannerDesc">Fast & offline access ke liye add karein</span>
                 </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="triggerPwaInstall()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow transition" data-i18n="installBtn">Install</button>
+                <button onclick="dismissInstallBanner()" class="text-slate-400 hover:text-white text-xs px-1.5 py-1">✕</button>
+            </div>
+        </div>
 
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-semibold text-slate-500">Subscription Fee</span>
-                        <span class="text-xl font-extrabold text-blue-600">₹199</span>
-                    </div>
-                    <div class="text-xs text-slate-700 mb-2">
-                        <strong>UPI ID:</strong> 
-                        <span class="font-mono bg-white px-2 py-1 border rounded text-slate-800 font-semibold" id="display-upi">nareshkhichar@airtel</span>
-                        <button onclick="copyUpiId()" class="ml-1 text-blue-600 hover:underline font-medium"><i class="fa-regular fa-copy"></i> Copy</button>
-                    </div>
-                    <p class="text-[11px] text-slate-500 mt-2 leading-relaxed">
-                        Kisi bhi UPI app (Google Pay, PhonePe, Paytm, BHIM) se upar di gayi UPI ID par <strong>₹199</strong> transfer karein.
-                    </p>
+        <!-- 1.1 Subscription & Approval Lock Screen Overlay -->
+        <div id="device-lock-screen" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+            <div class="glass-panel rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-7 text-center relative overflow-hidden border border-indigo-500/30">
+                <button type="button" onclick="toggleLockOverlayPreview(false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm p-1" title="Close Preview">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-brain"></i>
                 </div>
+                <h2 class="text-2xl font-extrabold text-white tracking-tight">Indian AI Factory</h2>
+                <p class="text-xs text-indigo-300 mb-6 font-medium" data-i18n="appSubtitle">Smart Syllabus & AI Study Tracker</p>
 
-                <div class="text-center space-y-2">
-                    <p class="text-xs text-slate-500">Payment receive hone par admin dwara access approve kar diya jayega.</p>
-                    <button onclick="checkStatusManual()" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-medium transition shadow flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-rotate-right"></i>
-                        <span>Approval Status Check Karein</span>
+                <!-- Registration Step -->
+                <div id="step-register">
+                    <p class="text-xs text-slate-300 mb-4 text-left font-medium" data-i18n="regInstruction">App unlock karne ke liye apna naam aur mobile number enter karein:</p>
+                    <div class="space-y-3 mb-5 text-left">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-400" data-i18n="nameLabel">Aapka Naam</label>
+                            <input type="text" id="user-name" placeholder="Apna pura naam likhein" class="w-full mt-1 px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-400" data-i18n="phoneLabel">Mobile Number</label>
+                            <input type="tel" id="user-phone" placeholder="10-digit mobile number" class="w-full mt-1 px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition">
+                        </div>
+                    </div>
+                    <button onclick="submitApprovalRequest()" class="w-full py-3 ai-glow-btn text-white font-semibold rounded-xl text-sm transition flex items-center justify-center gap-2">
+                        <span data-i18n="sendReqBtn">Access Request Bhejein</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <span class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow">
-                    IAF
-                </span>
-                <div>
-                    <h1 class="text-base font-bold text-slate-900 leading-tight">Indian AI Factory</h1>
-                    <p class="text-[11px] text-slate-500 leading-none">Smart Syllabus & Study Tracker</p>
+                <!-- Payment / Approval Waiting Step -->
+                <div id="step-payment" class="hidden text-left">
+                    <div class="bg-indigo-950/60 border border-indigo-500/30 p-3.5 rounded-xl mb-4 text-xs text-indigo-200 flex items-start gap-2.5">
+                        <i class="fa-solid fa-circle-check mt-0.5 text-indigo-400"></i>
+                        <div data-i18n="reqSubmittedNotice">Aapki request submit ho chuki hai. Instant activate karne ke liye subscription confirm karein.</div>
+                    </div>
+
+                    <div class="bg-slate-900/70 border border-slate-700/80 rounded-2xl p-4 mb-5">
+                        <div class="flex justify-between items-center mb-2.5">
+                            <span class="text-xs font-semibold text-slate-400" data-i18n="subPassLabel">Lifetime Access Pass</span>
+                            <span class="text-xl font-black text-indigo-400">₹199</span>
+                        </div>
+                        <div class="text-xs text-slate-300 mb-2">
+                            <strong>UPI ID:</strong> 
+                            <span class="font-mono bg-black/50 px-2.5 py-1 rounded-lg border border-slate-700 text-cyan-300 font-semibold" id="display-upi">nareshkhichar@airtel</span>
+                            <button onclick="copyUpiId()" class="ml-1.5 text-indigo-400 hover:text-indigo-300 font-medium"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-2 leading-relaxed" data-i18n="upiInstructions">
+                            PhonePe / Google Pay / Paytm se upar di gayi UPI ID par <strong>₹199</strong> transfer karein.
+                        </p>
+                    </div>
+
+                    <div class="text-center space-y-2">
+                        <p class="text-[11px] text-slate-400" data-i18n="waitApprovalMsg">Payment hote hi verify karke aapka account approve ho jayega.</p>
+                        <button onclick="checkStatusManual()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            <span data-i18n="checkStatusBtn">Approval Status Check Karein</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-            
-            <div class="flex items-center space-x-2">
-                <!-- PWA Install Prompt Button (fallback for mobile/desktop) -->
-                <button id="pwa-install-header-btn" onclick="triggerPwaInstall()" class="hidden text-xs bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 font-semibold px-2.5 py-1.5 rounded-lg transition items-center gap-1">
-                    <i class="fa-solid fa-download"></i>
-                    <span>App Install</span>
-                </button>
-                <!-- Focus Sound Button -->
-                <button onclick="toggleAmbientSound()" id="ambient-btn" title="Focus Sound" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 flex items-center justify-center text-xs transition">
-                    <i class="fa-solid fa-cloud-rain"></i>
-                </button>
-                <div class="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200 font-medium">
-                    🔥 <span id="streak-counter">0</span> Day
-                </div>
-            </div>
         </div>
-    </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="bg-white border-b border-slate-200">
-        <div class="max-w-5xl mx-auto px-4 flex space-x-6 text-xs sm:text-sm">
-            <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="py-3 active-tab flex items-center gap-1.5">
-                <i class="fa-solid fa-chart-pie"></i> Dashboard
-            </button>
-            <button onclick="switchTab('syllabus')" id="tab-btn-syllabus" class="py-3 text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
-                <i class="fa-solid fa-book-open"></i> My Syllabus
-            </button>
-            <button onclick="switchTab('timetable')" id="tab-btn-timetable" class="py-3 text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
-                <i class="fa-solid fa-calendar-days"></i> Daily Time Table
-            </button>
-        </div>
-    </nav>
-
-    <!-- Main Container -->
-    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
-
-        <!-- ================= TAB 1: DASHBOARD ================= -->
-        <section id="tab-dashboard" class="space-y-6">
-
-            <!-- Live Progress Overview Report -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-line text-blue-600"></i> Live Progress Report
-                    </h2>
-                    <span id="overall-percentage" class="text-xs font-bold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-200">0% Complete</span>
+        <!-- 1.2 Header -->
+        <header class="glass-panel border-b border-slate-800/80 sticky top-10 z-30 shadow-lg">
+            <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-500/20">
+                        AI
+                    </div>
+                    <div>
+                        <h1 class="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none">Indian AI Factory</h1>
+                        <p class="text-[11px] text-slate-400 leading-none mt-1" data-i18n="headerSubtitle">Smart Syllabus & Study Tracker</p>
+                    </div>
                 </div>
                 
-                <div class="w-full bg-slate-100 rounded-full h-2.5 mb-4 overflow-hidden">
-                    <div id="overall-progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
-                </div>
-
-                <div class="grid grid-cols-3 gap-3 text-center">
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <span class="text-[11px] text-slate-500 font-medium">Total Topics</span>
-                        <h4 id="stat-total-topics" class="text-base sm:text-xl font-bold text-slate-800 mt-0.5">0</h4>
-                    </div>
-                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-                        <span class="text-[11px] text-emerald-600 font-medium">Completed</span>
-                        <h4 id="stat-completed-topics" class="text-base sm:text-xl font-bold text-emerald-700 mt-0.5">0</h4>
-                    </div>
-                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-100">
-                        <span class="text-[11px] text-amber-600 font-medium">Pending</span>
-                        <h4 id="stat-pending-topics" class="text-base sm:text-xl font-bold text-amber-700 mt-0.5">0</h4>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Focus Pomodoro Timer -->
-            <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                    <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-medium">Focus Timer</span>
-                    <h3 class="text-lg font-bold mt-1">25-Minute Pomodoro Study Session</h3>
-                    <p class="text-xs text-blue-100 mt-0.5">Ekagrachitt hokar padhai karein aur alert beep payein.</p>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-3xl sm:text-4xl font-mono font-extrabold tracking-wider" id="timer-display">25:00</div>
-                    <div class="flex gap-2">
-                        <button onclick="toggleTimer()" id="timer-btn" class="w-10 h-10 bg-white text-blue-700 hover:bg-blue-50 rounded-xl flex items-center justify-center font-bold shadow transition">
-                            <i class="fa-solid fa-play"></i>
-                        </button>
-                        <button onclick="resetTimer()" class="w-10 h-10 bg-white/20 hover:bg-white/30 text-white rounded-xl flex items-center justify-center transition">
-                            <i class="fa-solid fa-rotate-left"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Window 1: Aaj Ka Padhne Wala Subject & Topic -->
-            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-                <div class="flex justify-between items-center mb-3">
-                    <div>
-                        <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                            <i class="fa-solid fa-book text-blue-600"></i> Aaj Ka Mukhya Adhyayan (Today's Study Plan)
-                        </h3>
-                        <p class="text-xs text-slate-500">Aaj ke nirdharit vishay aur unke important sub-topics</p>
-                    </div>
-                    <span id="study-badge-count" class="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">0 Tasks</span>
-                </div>
-                <div id="today-study-list" class="space-y-2 mt-4"></div>
-            </div>
-
-            <!-- Window 2: Aaj Ka Revise Karne Wala Topic (Revision Window) -->
-            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-                <div class="flex justify-between items-center mb-3">
-                    <div>
-                        <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                            <i class="fa-solid fa-rotate text-emerald-600"></i> Aaj Ka Revision Section (Revision Window)
-                        </h3>
-                        <p class="text-xs text-slate-500">1-3-7-21 scientific formula se auto-scheduled revision topics</p>
-                    </div>
-                    <span id="rev-badge-count" class="text-xs font-semibold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">0 Revisions</span>
-                </div>
-                <div id="today-revision-list" class="space-y-2 mt-4"></div>
-            </div>
-
-            <!-- Window 3: Quick Topic Scheduler (Subject -> Subtopic -> Date & Time) -->
-            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-slate-900 text-sm sm:text-base mb-1 flex items-center gap-2">
-                    <i class="fa-regular fa-calendar-plus text-indigo-600"></i> Topic Schedule Karein
-                </h3>
-                <p class="text-xs text-slate-500 mb-4">Subject chunein, uska structured sub-topic chunein aur date/time set karein:</p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                    <div>
-                        <label class="font-semibold text-slate-700 block mb-1">1. Subject (Vishay)</label>
-                        <select id="sched-subject-select" onchange="onSubjectChange()" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="">Subject chunein...</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700 block mb-1">2. Sub-Topic</label>
-                        <select id="sched-topic-select" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="">Pehle subject chunein...</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700 block mb-1">3. Date & Time</label>
-                        <input type="datetime-local" id="sched-datetime" class="w-full p-2 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700 block mb-1">4. Schedule Type</label>
-                        <select id="sched-type" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="study">Mukhya Study</option>
-                            <option value="revision">Revision</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="mt-4 flex justify-end">
-                    <button onclick="scheduleTask()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus"></i> Schedule Me Jodein
+                <div class="flex items-center space-x-2">
+                    <!-- Language Switcher Tab (Hindi / English) -->
+                    <button onclick="toggleLanguage()" id="lang-toggle-btn" class="text-xs bg-slate-900 border border-slate-700 hover:border-indigo-500 text-slate-300 px-2.5 py-1.5 rounded-xl font-medium transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-language text-indigo-400"></i>
+                        <span id="lang-label">English</span>
                     </button>
-                </div>
-            </div>
 
-        </section>
-
-        <!-- ================= TAB 2: MY SYLLABUS ================= -->
-        <section id="tab-syllabus" class="hidden space-y-6">
-
-            <!-- Import / Add Syllabus Card (Word & Text only) -->
-            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-                <div class="flex justify-between items-center mb-3">
-                    <div>
-                        <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                            <i class="fa-solid fa-file-import text-blue-600"></i> Syllabus Import & Structure
-                        </h3>
-                        <p class="text-xs text-slate-500">Word file (.docx) upload karein ya direct text paste karke structured sub-topics banayein</p>
-                    </div>
-                    <button onclick="loadSampleSyllabus()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 font-medium transition">
-                        ⚡ Load Demo Syllabus
+                    <!-- PWA Install URL button -->
+                    <button id="pwa-install-header-btn" onclick="triggerPwaInstall()" class="hidden text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 hover:bg-indigo-500/30 font-semibold px-2.5 py-1.5 rounded-xl transition items-center gap-1.5">
+                        <i class="fa-solid fa-download text-[11px]"></i>
+                        <span data-i18n="installAppHeader">Install App</span>
                     </button>
-                </div>
 
-                <!-- Word Upload Single Focus Box -->
-                <div class="mb-4">
-                    <label class="border-2 border-dashed border-blue-200 hover:border-blue-400 p-5 rounded-xl cursor-pointer text-center bg-blue-50/40 hover:bg-blue-50 transition block">
-                        <i class="fa-regular fa-file-word text-blue-600 text-3xl mb-1.5"></i>
-                        <span class="block text-xs font-bold text-slate-800">Word Document (.docx) Upload Karein</span>
-                        <span class="block text-[11px] text-slate-500 mt-0.5">App apne-aap Subject aur uske andar ke Sub-topics ko structure kar lega</span>
-                        <input type="file" id="word-upload" accept=".docx" class="hidden" onchange="handleWordUpload(event)">
-                    </label>
-                </div>
-
-                <!-- Structured Text Paste Area -->
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="font-semibold text-slate-700 text-xs">Direct Text Paste Karein (Auto-Structure Support):</label>
-                        <span class="text-[10px] text-slate-400 font-mono">Subject: Subtopic 1, Subtopic 2 ya Dash (-) format</span>
-                    </div>
-                    <textarea id="raw-syllabus-input" rows="6" class="w-full text-xs p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-mono bg-slate-50" placeholder="Udaharan format:
-Rajasthan History:
-- Kalibangan & Ahar Civilization
-- Major Dynasties & Administration
-- 1857 Revolution & Prajamandal
-- Integration of Rajasthan
-
-Rajasthan Geography:
-- Physical Features & Landforms
-- Climate & Drainage System
-- Soil & Vegetation
-
-Indian Polity:
-- Preamble & Fundamental Rights
-- Directive Principles & Duties
-- Governor, Chief Minister & Cabinet"></textarea>
-                    <div class="mt-2 flex justify-end">
-                        <button onclick="parseAndSavePastedText()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-check"></i>
-                            <span>Text Se Structured Syllabus Save Karein</span>
-                        </button>
+                    <!-- Ambient Rain Sound -->
+                    <button onclick="toggleAmbientSound()" id="ambient-btn" title="Focus Rain Noise" class="w-8 h-8 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-400 hover:text-white flex items-center justify-center text-xs transition">
+                        <i class="fa-solid fa-cloud-rain"></i>
+                    </button>
+                    
+                    <div class="text-xs text-amber-300 bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/20 font-semibold flex items-center gap-1">
+                        <span>🔥</span> <span id="streak-counter">1</span> <span data-i18n="streakLabel">Day Streak</span>
                     </div>
                 </div>
             </div>
+        </header>
 
-            <!-- Subject & Sub-topic Structured Directory List -->
-            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                        <i class="fa-solid fa-folder-tree text-indigo-600"></i> Aapka Structured Syllabus
+        <!-- 1.3 Navigation Tabs (Only 'Syllabus' name, RAS removed) -->
+        <nav class="max-w-5xl mx-auto px-4 pt-4 w-full">
+            <div class="grid grid-cols-3 gap-2 p-1.5 glass-panel rounded-2xl border border-slate-800 text-xs sm:text-sm font-semibold">
+                <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="py-2.5 rounded-xl active-ai-tab transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
+                    <i class="fa-solid fa-gauge-high"></i> 
+                    <span data-i18n="tabDashboard">डैशबोर्ड</span>
+                </button>
+                <button onclick="switchTab('syllabus')" id="tab-btn-syllabus" class="py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
+                    <i class="fa-solid fa-layer-group"></i> 
+                    <span data-i18n="tabSyllabus">Syllabus</span>
+                </button>
+                <button onclick="switchTab('timetable')" id="tab-btn-timetable" class="py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
+                    <i class="fa-solid fa-calendar-check"></i> 
+                    <span data-i18n="tabTimeTable">टाइम टेबल</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- 1.4 Main Student Container -->
+        <main class="max-w-5xl mx-auto px-4 py-5 flex-grow w-full space-y-5">
+
+            <!-- ================= TAB 1: DASHBOARD ================= -->
+            <section id="tab-dashboard" class="space-y-5">
+
+                <!-- Live Progress Overview Report (Glass style) -->
+                <div class="glass-panel p-5 rounded-3xl border border-slate-800 shadow-xl relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span data-i18n="progressTitle">लाइव प्रोग्रेस रिपोर्ट (Syllabus Completion)</span>
+                        </h2>
+                        <span id="overall-percentage" class="text-xs font-black px-2.5 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full font-mono">0% Completed</span>
+                    </div>
+                    
+                    <div class="w-full bg-slate-900/90 rounded-full h-3 mb-4 p-0.5 border border-slate-800 overflow-hidden">
+                        <div id="overall-progress-bar" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 h-2 rounded-full transition-all duration-700 shadow-md shadow-indigo-500/50" style="width: 0%"></div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2.5 sm:gap-3 text-center">
+                        <div class="glass-card p-3 rounded-2xl">
+                            <span class="text-[11px] text-slate-400 font-medium" data-i18n="totalTopicsLabel">कुल सब-टॉपिक्स</span>
+                            <h4 id="stat-total-topics" class="text-lg sm:text-2xl font-black text-white mt-0.5">107</h4>
+                        </div>
+                        <div class="glass-card p-3 rounded-2xl border-emerald-500/20">
+                            <span class="text-[11px] text-emerald-400 font-medium" data-i18n="completedTopicsLabel">पूर्ण हुए</span>
+                            <h4 id="stat-completed-topics" class="text-lg sm:text-2xl font-black text-emerald-300 mt-0.5">0</h4>
+                        </div>
+                        <div class="glass-card p-3 rounded-2xl border-amber-500/20">
+                            <span class="text-[11px] text-amber-400 font-medium" data-i18n="pendingTopicsLabel">शेष टॉपिक्स</span>
+                            <h4 id="stat-pending-topics" class="text-lg sm:text-2xl font-black text-amber-300 mt-0.5">107</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Focus Pomodoro Timer -->
+                <div class="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-900 rounded-3xl p-5 border border-indigo-500/30 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <span class="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-0.5 rounded-full font-semibold uppercase tracking-wider">AI Focus Engine</span>
+                        <h3 class="text-base sm:text-lg font-bold text-white mt-1" data-i18n="pomodoroTitle">25-मिनट पोमोडोरो स्टडी सेशन</h3>
+                        <p class="text-xs text-slate-400 mt-0.5" data-i18n="pomodoroDesc">एकाग्र होकर अध्ययन करें; समय पूरा होने पर स्वतः बीप अलर्ट मिलेगा।</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-3xl sm:text-4xl font-mono font-black text-cyan-300 tracking-wider drop-shadow-[0_0_12px_rgba(6,182,212,0.4)]" id="timer-display">25:00</div>
+                        <div class="flex gap-2">
+                            <button onclick="toggleTimer()" id="timer-btn" class="w-11 h-11 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-indigo-600/40 transition">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                            <button onclick="resetTimer()" class="w-11 h-11 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl flex items-center justify-center transition border border-slate-700">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Window 1: आज का पढ़ने वाला सब्जेक्ट और टॉपिक (Main Study Window) -->
+                <div class="glass-panel rounded-3xl p-5 border border-slate-800 shadow-lg">
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <h3 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+                                <i class="fa-solid fa-book-open-reader text-indigo-400"></i> <span data-i18n="todayStudyTitle">आज का मुख्य अध्ययन (Study Plan)</span>
+                            </h3>
+                            <p class="text-xs text-slate-400" data-i18n="todayStudyDesc">आज के निर्धारित विषय और महत्वपूर्ण सब-टॉपिक्स</p>
+                        </div>
+                        <span id="study-badge-count" class="text-xs font-semibold px-2.5 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full font-mono">0 Tasks</span>
+                    </div>
+                    <div id="today-study-list" class="space-y-2 mt-4"></div>
+                </div>
+
+                <!-- Window 2: आज का रिवाइज करने वाला टॉपिक (Revision Window) -->
+                <div class="glass-panel rounded-3xl p-5 border border-slate-800 shadow-lg">
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <h3 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+                                <i class="fa-solid fa-rotate text-emerald-400"></i> <span data-i18n="todayRevTitle">आज का रिवीज़न सेक्शन (1-3-7-21 Formula)</span>
+                            </h3>
+                            <p class="text-xs text-slate-400" data-i18n="todayRevDesc">साइंटिफिक स्पेसड रिपीटिशन से स्वतः तय रिवीज़न टॉपिक्स</p>
+                        </div>
+                        <span id="rev-badge-count" class="text-xs font-semibold px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full font-mono">0 Revisions</span>
+                    </div>
+                    <div id="today-revision-list" class="space-y-2 mt-4"></div>
+                </div>
+
+                <!-- Window 3: Quick Topic Scheduler (Subject -> Subtopic -> Date & Time) -->
+                <div class="glass-panel rounded-3xl p-5 border border-slate-800 shadow-lg">
+                    <h3 class="font-bold text-white text-sm sm:text-base mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-cyan-400"></i> <span data-i18n="scheduleNewTitle">नया टॉपिक शेड्यूल करें</span>
                     </h3>
-                    <button onclick="clearAllSyllabus()" class="text-xs text-red-500 hover:underline">
-                        <i class="fa-regular fa-trash-can mr-1"></i> Pura Syllabus Clear Karein
-                    </button>
+                    <p class="text-xs text-slate-400 mb-4" data-i18n="scheduleNewDesc">विषय चुनें, सब-टॉपिक चुनें और दिनांक व समय निर्धारित करें:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div>
+                            <label class="font-semibold text-slate-300 block mb-1" data-i18n="selectSubjLabel">1. विषय (Subject)</label>
+                            <select id="sched-subject-select" onchange="onSubjectChange()" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-900/90 text-white focus:border-indigo-500 outline-none">
+                                <option value="">विषय चुनें...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-300 block mb-1" data-i18n="selectTopicLabel">2. सब-टॉपिक</label>
+                            <select id="sched-topic-select" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-900/90 text-white focus:border-indigo-500 outline-none">
+                                <option value="">पहले विषय चुनें...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-300 block mb-1" data-i18n="selectDateTimeLabel">3. दिनांक और समय</label>
+                            <input type="datetime-local" id="sched-datetime" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-900/90 text-white focus:border-indigo-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-300 block mb-1" data-i18n="selectTypeLabel">4. प्रकार</label>
+                            <select id="sched-type" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-900/90 text-white focus:border-indigo-500 outline-none">
+                                <option value="study" data-i18n="typeStudy">मुख्य अध्ययन (Study)</option>
+                                <option value="revision" data-i18n="typeRevision">रिवीज़न (Revision)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex justify-end">
+                        <button onclick="scheduleTask()" class="px-5 py-2.5 ai-glow-btn text-white rounded-xl text-xs font-semibold shadow-md transition flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-plus"></i>
+                            <span data-i18n="addToScheduleBtn">शेड्यूल में जोड़ें</span>
+                        </button>
+                    </div>
                 </div>
-                <div id="syllabus-directory" class="space-y-4"></div>
+
+            </section>
+
+            <!-- ================= TAB 2: SYLLABUS ================= -->
+            <section id="tab-syllabus" class="hidden space-y-5">
+
+                <!-- Update & Import Controls -->
+                <div class="glass-panel rounded-3xl p-5 border border-slate-800 shadow-xl">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                        <div>
+                            <h3 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+                                <i class="fa-solid fa-pen-to-square text-indigo-400"></i> <span data-i18n="syllabusCustomTitle">सिलेबस अपडेट और कस्टमाइज़ेशन</span>
+                            </h3>
+                            <p class="text-xs text-slate-400" data-i18n="syllabusCustomDesc">नया टॉपिक जोड़ें, Word (.docx) से अपडेट करें या डिफ़ॉल्ट सिलेबस रीस्टोर करें।</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="restoreDefaultRASSyllabus()" class="text-xs bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/30 px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-rotate-left"></i>
+                                <span data-i18n="restoreDefaultBtn">डिफ़ॉल्ट सिलेबस रीस्टोर करें</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add Custom Subject / Topic Fast Input -->
+                    <div class="glass-card p-4 rounded-2xl mb-4 border border-slate-700/60">
+                        <span class="text-xs font-bold text-white block mb-2" data-i18n="quickAddTitle">⚡ क्विक न्यू टॉपिक जोड़ें:</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                            <input type="text" id="custom-subject-input" placeholder="विषय का नाम (जैसे: राजस्थान का भूगोल)" class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-indigo-500">
+                            <input type="text" id="custom-topic-input" placeholder="सब-टॉपिक का नाम" class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-indigo-500">
+                            <button onclick="addCustomTopicDirect()" class="p-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> <span data-i18n="addTopicBtn">टॉपिक जोड़ें</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Word Upload & Raw Text Paste -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                        <!-- Word Document Upload -->
+                        <label class="border-2 border-dashed border-indigo-500/30 hover:border-indigo-400 p-4 rounded-2xl cursor-pointer text-center bg-indigo-950/20 hover:bg-indigo-950/40 transition block">
+                            <i class="fa-regular fa-file-word text-indigo-400 text-2xl mb-1"></i>
+                            <span class="block text-xs font-bold text-white" data-i18n="uploadWordTitle">Word डॉक्यूमेंट (.docx) से अपडेट करें</span>
+                            <span class="block text-[11px] text-slate-400 mt-0.5" data-i18n="uploadWordDesc">विषय व सब-टॉपिक ऑटो-स्ट्रक्चर होंगे</span>
+                            <input type="file" id="word-upload" accept=".docx" class="hidden" onchange="handleWordUpload(event)">
+                        </label>
+
+                        <!-- Fast Raw Text Area -->
+                        <div class="glass-card p-3 rounded-2xl">
+                            <span class="text-[11px] font-semibold text-slate-300 block mb-1" data-i18n="pasteTextTitle">टेक्स्ट से बल्क अपडेट:</span>
+                            <textarea id="raw-syllabus-input" rows="2" class="w-full text-xs p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono outline-none focus:border-indigo-500" placeholder="विषय: सब-टॉपिक 1, सब-टॉपिक 2..."></textarea>
+                            <div class="mt-2 flex justify-end">
+                                <button onclick="parseAndSavePastedText()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-indigo-300 border border-slate-600 rounded-lg transition">
+                                    <span data-i18n="saveTextBtn">टेक्स्ट सेव करें</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full Structured Directory -->
+                <div class="glass-panel rounded-3xl p-5 border border-slate-800 shadow-xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+                                <i class="fa-solid fa-cubes text-indigo-400"></i> <span data-i18n="syllabusDirTitle">स्ट्रक्चर्ड विषयवार डायरेक्टरी</span>
+                            </h3>
+                            <p class="text-xs text-slate-400" data-i18n="syllabusDirDesc">सभी 15 प्रमुख विषय और 107 सब-टॉपिक्स की संपूर्ण सूची</p>
+                        </div>
+                        <button onclick="clearAllSyllabus()" class="text-xs text-red-400 hover:text-red-300 transition">
+                            <i class="fa-regular fa-trash-can mr-1"></i> <span data-i18n="clearAllBtn">खाली करें</span>
+                        </button>
+                    </div>
+                    <div id="syllabus-directory" class="space-y-4"></div>
+                </div>
+
+            </section>
+
+            <!-- ================= TAB 3: DAILY TIME TABLE GENERATOR ================= -->
+            <section id="tab-timetable" class="hidden space-y-5">
+
+                <div class="glass-panel rounded-3xl p-5 border border-slate-800 shadow-xl">
+                    <h3 class="font-bold text-white text-sm sm:text-base mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i> <span data-i18n="ttGenTitle">AI स्मार्ट टाइम टेबल जनरेटर</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-4" data-i18n="ttGenDesc">अवधि और बफर फ्रीक्वेंसी चुनकर पूरे सिलेबस का स्वचालित प्लान बनाएं:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div>
+                            <label class="font-semibold text-slate-300 block mb-1" data-i18n="ttStartDateLabel">शुरुआती दिनांक</label>
+                            <input type="date" id="tt-start-date" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-900/90 text-white focus:border-indigo-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-300 block mb-1" data-i18n="ttDurationLabel">प्लान की अवधि</label>
+                            <select id="tt-duration" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-900/90 text-white focus:border-indigo-500 outline-none">
+                                <option value="15">15 दिन का क्रैश प्लान</option>
+                                <option value="30">30 दिन का फास्ट ट्रैक</option>
+                                <option value="60" selected>60 दिन का मास्टर प्लान</option>
+                                <option value="90">90 दिन का फुल कवरेज</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-300 block mb-1" data-i18n="ttSessionLabel">प्रति सेशन समय</label>
+                            <select id="tt-session-time" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-900/90 text-white focus:border-indigo-500 outline-none">
+                                <option value="45">45 मिनट</option>
+                                <option value="60" selected>60 मिनट</option>
+                                <option value="90">90 मिनट</option>
+                                <option value="120">120 मिनट</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-300 block mb-1" data-i18n="ttFreqLabel">फ्रीक्वेंसी / बफर</label>
+                            <select id="tt-frequency" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-900/90 text-white focus:border-indigo-500 outline-none">
+                                <option value="1" data-i18n="freqDaily">रोज़ाना</option>
+                                <option value="2" data-i18n="freqAlt">एक दिन छोड़कर</option>
+                                <option value="3" data-i18n="freqEvery3rd">हर 2 दिन बाद</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex justify-end">
+                        <button onclick="generateTimeTablePreview()" class="px-5 py-2.5 ai-glow-btn text-white rounded-xl text-xs font-semibold shadow-md transition flex items-center gap-2">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span data-i18n="generateTTBtn">AI टाइम टेबल जनरेट करें</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preview Card -->
+                <div id="tt-preview-card" class="glass-panel rounded-3xl p-5 border border-slate-800 shadow-xl hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                                <i class="fa-regular fa-calendar-check text-emerald-400"></i> <span data-i18n="ttPreviewTitle">टाइम टेबल प्रीव्यू</span>
+                            </h4>
+                            <p class="text-xs text-slate-400" data-i18n="ttPreviewDesc">नीचे बना प्लान देखें और मुख्य डैशबोर्ड में लागू करें:</p>
+                        </div>
+                        <button onclick="applyGeneratedSchedule()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-2">
+                            <i class="fa-solid fa-check-double"></i>
+                            <span data-i18n="applyScheduleBtn">मुख्य शेड्यूल में लागू करें</span>
+                        </button>
+                    </div>
+                    <div id="tt-preview-content" class="space-y-2.5 max-h-96 overflow-y-auto pr-1"></div>
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="glass-panel border-t border-slate-800/80 py-4 text-center text-xs text-slate-400 mt-auto">
+            Managed & Powered by <strong class="text-indigo-400">Indian AI Factory</strong>
+        </footer>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 2. ADMIN PORTAL VIEW (Isolated for management)           -->
+    <!-- ======================================================== -->
+    <div id="admin-portal-view" class="hidden flex-grow flex flex-col bg-slate-950 text-slate-100">
+
+        <!-- Admin Login Screen -->
+        <div id="admin-login-modal" class="fixed inset-0 z-40 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+            <div class="glass-panel rounded-3xl shadow-2xl max-w-sm w-full p-6 text-center border border-indigo-500/30">
+                <div class="w-14 h-14 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white mb-1">Admin Portal</h2>
+                <p class="text-xs text-indigo-300 mb-6">Indian AI Factory Management</p>
+
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-400">Master PIN</label>
+                        <input type="password" id="admin-pin" placeholder="Enter PIN (Default: 9999)" class="w-full mt-1 px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:border-indigo-500 outline-none">
+                    </div>
+                    <button onclick="verifyAdminPin()" class="w-full py-2.5 ai-glow-btn text-white font-semibold rounded-xl text-sm transition">
+                        Login Karein
+                    </button>
+                    <p class="text-[11px] text-slate-500 text-center">डिफ़ॉल्ट पिन: <strong class="text-indigo-400 font-mono">9999</strong></p>
+                </div>
             </div>
+        </div>
 
-        </section>
+        <!-- Admin Main Dashboard -->
+        <div id="admin-main-content" class="hidden flex-grow flex flex-col">
+            <header class="glass-panel border-b border-slate-800 sticky top-10 z-30">
+                <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow">
+                            IAF
+                        </span>
+                        <div>
+                            <h1 class="text-base font-bold text-white leading-tight">Indian AI Factory - Admin Panel</h1>
+                            <p class="text-[11px] text-indigo-300 leading-none">Subscription & Access Control</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openChangePinModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-key text-[11px]"></i>
+                            <span>Change PIN</span>
+                        </button>
+                        <button onclick="adminLogout()" class="text-xs text-red-400 hover:text-red-300 bg-red-950/30 hover:bg-red-950/50 px-3 py-1.5 rounded-xl border border-red-500/30 transition">
+                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-        <!-- ================= TAB 3: DAILY TIME TABLE GENERATOR ================= -->
-        <section id="tab-timetable" class="hidden space-y-6">
+            <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-card p-4 rounded-2xl border border-slate-800">
+                        <p class="text-xs font-semibold text-slate-400 uppercase">Total Requests</p>
+                        <h3 class="text-2xl font-black text-white mt-1" id="stat-total-requests">0</h3>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border border-emerald-500/20">
+                        <p class="text-xs font-semibold text-emerald-400 uppercase">Approved Users</p>
+                        <h3 class="text-2xl font-black text-emerald-300 mt-1" id="stat-approved-requests">0</h3>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border border-amber-500/20">
+                        <p class="text-xs font-semibold text-amber-400 uppercase">Pending Requests</p>
+                        <h3 class="text-2xl font-black text-amber-300 mt-1" id="stat-pending-requests">0</h3>
+                    </div>
+                </div>
 
-            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-slate-900 text-sm sm:text-base mb-1 flex items-center gap-2">
-                    <i class="fa-solid fa-wand-magic-sparkles text-blue-600"></i> Smart Daily Time Table Generator
+                <!-- Request Table -->
+                <div class="glass-panel rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+                    <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                        <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-users text-indigo-400"></i> User Access Requests
+                        </h3>
+                        <button onclick="loadAdminRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate-right"></i> Refresh List
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900/80 border-b border-slate-800 text-slate-400 font-semibold uppercase">
+                                <tr>
+                                    <th class="p-3.5">User Details</th>
+                                    <th class="p-3.5">Device Code</th>
+                                    <th class="p-3.5">Amount</th>
+                                    <th class="p-3.5">Request Date</th>
+                                    <th class="p-3.5">Status</th>
+                                    <th class="p-3.5 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="request-table-body" class="divide-y divide-slate-800/80">
+                                <tr>
+                                    <td colspan="6" class="p-4 text-center text-slate-500">Loading requests...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="glass-panel border-t border-slate-800 py-3 text-center text-xs text-slate-500 mt-auto">
+                Secure Admin Access • Indian AI Factory
+            </footer>
+        </div>
+
+        <!-- Change PIN Modal -->
+        <div id="change-pin-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="glass-panel rounded-2xl max-w-xs w-full p-5 border border-slate-700 text-left">
+                <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-key text-indigo-400"></i> Change Master PIN
                 </h3>
-                <p class="text-xs text-slate-500 mb-4">Duration aur buffer frequency chun kar structured timetable generate karein:</p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                <div class="space-y-3 text-xs mb-4">
                     <div>
-                        <label class="font-semibold text-slate-700 block mb-1">Start Date</label>
-                        <input type="date" id="tt-start-date" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label class="text-slate-400 block mb-1">Purana PIN</label>
+                        <input type="password" id="old-pin-input" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none">
                     </div>
                     <div>
-                        <label class="font-semibold text-slate-700 block mb-1">Plan Duration</label>
-                        <select id="tt-duration" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="7">7 Days Crash Plan</option>
-                            <option value="15">15 Days Plan</option>
-                            <option value="30" selected>30 Days Master Plan</option>
-                            <option value="45">45 Days Plan</option>
-                            <option value="60">60 Days Plan</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700 block mb-1">Session Duration</label>
-                        <select id="tt-session-time" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="45">45 Minutes</option>
-                            <option value="60" selected>60 Minutes</option>
-                            <option value="90">90 Minutes</option>
-                            <option value="120">120 Minutes</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700 block mb-1">Buffer / Alternate Days</label>
-                        <select id="tt-frequency" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="1">Daily (Rozana)</option>
-                            <option value="2">Alternate Days (1 Din Chhod Kar)</option>
-                            <option value="3">Every 3rd Day (Har 2 Din Baad)</option>
-                        </select>
+                        <label class="text-slate-400 block mb-1">Naya PIN (कम से कम 4 अंक)</label>
+                        <input type="password" id="new-pin-input" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none">
                     </div>
                 </div>
-
-                <div class="mt-4 flex justify-end gap-2">
-                    <button onclick="generateTimeTablePreview()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-bolt"></i> Time Table Preview Banayein
-                    </button>
+                <div class="flex justify-end gap-2 text-xs">
+                    <button onclick="closeChangePinModal()" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+                    <button onclick="saveNewAdminPin()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg">Save PIN</button>
                 </div>
             </div>
+        </div>
 
-            <!-- Preview Window -->
-            <div id="tt-preview-card" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="fa-regular fa-calendar-check text-emerald-600"></i> Time Table Preview
-                        </h4>
-                        <p class="text-xs text-slate-500">Niche tay timetable dekhein aur main dashboard schedule me apply karein:</p>
-                    </div>
-                    <button onclick="applyGeneratedSchedule()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-check-double"></i> Main Schedule Me Apply Karein
-                    </button>
-                </div>
-                <div id="tt-preview-content" class="space-y-3 max-h-96 overflow-y-auto pr-1"></div>
-            </div>
+    </div>
 
-        </section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
-        Managed & Powered by <strong class="text-slate-700">Indian AI Factory</strong>
-    </footer>
-
-    <!-- Audio Beep for Reminder & Timer -->
+    <!-- Audio Beep -->
     <audio id="beep-audio" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
-    <!-- JavaScript Logic -->
     <script>
+        // Official Default 15 Subjects & 107 Sub-topics Master Dictionary
+        const DEFAULT_RAS_SYLLABUS = {
+            "राजस्थान का इतिहास, कला, संस्कृति, साहित्य, परम्परा एवं विरासत": [
+                { name: "राजस्थान के प्रागैतिहासिक स्थल पुरापाषाण काल से लेकर ताम्रपाषाण काल तक और कांस्य युग, प्राचीन राजस्थान का समाज और संस्कृति", completed: false, difficulty: "medium" },
+                { name: "राजस्थान इतिहास के स्रोतः पुरातात्विक, अभिलेखीय, साहित्यिक और मुद्राशास्त्रीय", completed: false, difficulty: "hard" },
+                { name: "राजस्थान के मुख्य राजवंशों के प्रमुख शासकों की राजनीतिक एवं सांस्कृतिक उपलब्धियाँ, केंद्रीय सत्ता के साथ सहयोग एवं प्रतिरोध, मध्यकालीन राजस्थान में प्रशासनिक एवं राजस्व व्यवस्था", completed: false, difficulty: "medium" },
+                { name: "18वीं–19वीं शताब्दी में राजनीतिक और सामाजिक स्थिति, 20वीं शताब्दी में किसान और आदिवासी आंदोलन, प्रजा मंडल आंदोलन और जन जागृति, राजस्थान का एकीकरण", completed: false, difficulty: "medium" },
+                { name: "राजस्थान की स्थापत्य परंपराएँ – मंदिर, किले, महल, स्मारक, मानव निर्मित जलाशय, चित्रकला और हस्तशिल्प की विभिन्न शैलियाँ; प्रदर्शन कलाएँ: लोक नृत्य और नाटक, संगीत (शास्त्रीय और लोक) और वाद्ययंत्र", completed: false, difficulty: "medium" },
+                { name: "भाषा एवं साहित्यः राजस्थानी भाषा की बोलियाँ, राजस्थानी भाषा का साहित्य और लोक साहित्य, धार्मिक जीवनः राजस्थान में धार्मिक समुदाय, संत और संप्रदाय, राजस्थान के लोक देवता और धार्मिक प्रथाएँ", completed: false, difficulty: "medium" },
+                { name: "राजस्थान में सामाजिक जीवनः मेले और त्यौहार; सामाजिक रीति–रिवाज और परंपराएँ, वेशभूषा और आभूषण", completed: false, difficulty: "easy" },
+                { name: "राजस्थान के प्रमुख व्यक्तित्व", completed: false, difficulty: "easy" }
+            ],
+            "भारत का इतिहास प्राचीनकाल एवं मध्यकाल": [
+                { name: "भारत के सांस्कृतिक आधार- सिंधु और वैदिक युगः छठी शताब्दी ईसा पूर्व के धार्मिक विचार आजीवक, बौद्ध और जैन धर्म।", completed: false, difficulty: "medium" },
+                { name: "मुख्य राजवंशों के प्रमुख शासकों की उपलब्धियाँ: मौर्य, कुषाण, सातवाहन, गुप्त, चालुक्य, पल्लव और चोल।", completed: false, difficulty: "hard" },
+                { name: "प्राचीन भारत में कला एवं स्थापत्य कला एवं वैज्ञानिक विकास", completed: false, difficulty: "medium" },
+                { name: "भारतीय ज्ञान एवं मूल्य व्यवस्थाः वर्णाश्रम, पुरुषार्थ, संस्कार, दर्शन एवं शिक्षा व्यवस्था।", completed: false, difficulty: "medium" },
+                { name: "सल्तनत कालः प्रमुख राजवंशों की उपलब्धियाँ, विजयनगर साम्राज्य की राजनीतिक और सांस्कृतिक उपलब्धियाँ।", completed: false, difficulty: "hard" },
+                { name: "मुगल कालः प्रशासन एवं विभिन्न नीतियांः मराठा", completed: false, difficulty: "hard" },
+                { name: "मध्यकाल में कला एवं वास्तुकला, साहित्य, चित्रकला और संगीत का विकास।", completed: false, difficulty: "medium" },
+                { name: "धार्मिक आंदोलन और भक्ति एवं सूफी आंदोलन का योगदान।", completed: false, difficulty: "easy" }
+            ],
+            "आधुनिक काल (प्रारंभिक 19वीं शताब्दी से 2000 तक)": [
+                { name: "ब्रिटिश साम्राज्यवाद और प्रतिरोध – मराठा, मैसूर, सिख। 1857 का विद्रोह। ब्रिटिश राजनीतिक, आर्थिक और प्रशासनिक नीतियाँ। राष्ट्रवाद का उदय, सामाजिक–धार्मिक आंदोलन।", completed: false, difficulty: "hard" },
+                { name: "स्वतंत्रता संग्राम और भारतीय राष्ट्रीय आंदोलन– विकास, चरण और प्रमुख घटनाएँ। क्रांतिकारी और विभिन्न क्षेत्रीय आंदोलन। स्वतंत्रता और विभाजन की ओर।", completed: false, difficulty: "hard" },
+                { name: "स्वातंत्र्योत्तर राष्ट्र निर्माण (2000 तक), राज्य पुनर्गठन, नेहरू युग में सांस्थानिक निर्माण, योजना एवं आर्थिक सुधार, विज्ञान एवं प्रौद्योगिकी का विकास", completed: false, difficulty: "medium" }
+            ],
+            "विश्व का भूगोल": [
+                { name: "भौतिक स्वरूपः– पर्वत, पठार, मैदान एवं मरूस्थल", completed: false, difficulty: "medium" },
+                { name: "प्रमुख नदियाँ एवं झीलें", completed: false, difficulty: "medium" },
+                { name: "प्राकृतिक वनस्पति", completed: false, difficulty: "easy" },
+                { name: "कृषि -प्रकार, वितरण तथा प्रमुख फसलें", completed: false, difficulty: "medium" },
+                { name: "प्रमुख औद्योगिक प्रदेश तथा प्रमुख उद्योग", completed: false, difficulty: "hard" },
+                { name: "परिवहन तन्त्र", completed: false, difficulty: "medium" },
+                { name: "पर्यावरणीय मुद्दे – मरूस्थलीकरण, वनोन्मूलन, जलवायु परिवर्तन एवं ग्लोबल वार्मिंग (वैश्विक तापन), ओजोन अवक्षय", completed: false, difficulty: "hard" }
+            ],
+            "भारत का भूगोल": [
+                { name: "भौतिक विभाग", completed: false, difficulty: "medium" },
+                { name: "जलवायु", completed: false, difficulty: "hard" },
+                { name: "प्रमुख नदियाँ एवं झीलें", completed: false, difficulty: "medium" },
+                { name: "सिंचाई", completed: false, difficulty: "medium" },
+                { name: "कृषि : प्रमुख फसलें", completed: false, difficulty: "easy" },
+                { name: "खनिजः धात्विक और अधात्विक", completed: false, difficulty: "hard" },
+                { name: "प्रमुख औद्योगिक प्रदेश तथा प्रमुख उद्योग", completed: false, difficulty: "medium" }
+            ],
+            "राजस्थान का भूगोल": [
+                { name: "राजस्थानः– अवस्थिति, विस्तार तथा भौतिक विभाग", completed: false, difficulty: "medium" },
+                { name: "नदियाँ एवं झीलें", completed: false, difficulty: "medium" },
+                { name: "जलवायु की विशेषताएं", completed: false, difficulty: "medium" },
+                { name: "प्राकृतिक वनस्पति, जैव विविधता तथा संरक्षण", completed: false, difficulty: "easy" },
+                { name: "मृदा", completed: false, difficulty: "easy" },
+                { name: "कृषि", completed: false, difficulty: "medium" },
+                { name: "पशुधन", completed: false, difficulty: "medium" },
+                { name: "सिंचाई", completed: false, difficulty: "medium" },
+                { name: "जनसंख्या– वृद्धि, घनत्व, साक्षरता, लिंगानुपात", completed: false, difficulty: "medium" },
+                { name: "नगरीकरण", completed: false, difficulty: "easy" },
+                { name: "जनजातियाँ", completed: false, difficulty: "easy" },
+                { name: "खनिज– धात्विक एवं अधात्विक", completed: false, difficulty: "hard" },
+                { name: "पर्यटन", completed: false, difficulty: "easy" }
+            ],
+            "भारतीय संविधान, राजनीतिक व्यवस्था और शासन": [
+                { name: "संविधान का निर्माण, उद्देशिका, नागरिकता, मौलिक अधिकार, राज्य की नीति के निदेशक तत्व और मौलिक कर्तव्य", completed: false, difficulty: "hard" },
+                { name: "संघीय सरकार– कार्यपालिका, विधायिका और न्यायपालिका", completed: false, difficulty: "hard" },
+                { name: "संघ राज्य संबंध, आपातकालीन प्रावधान", completed: false, difficulty: "hard" },
+                { name: "शहरी और ग्रामीण स्थानीय सरकार", completed: false, difficulty: "medium" },
+                { name: "निर्वाचन आयोग, संघ लोक सेवा आयोग, राष्ट्रीय मानवाधिकार आयोग, राष्ट्रीय महिला आयोग, राष्ट्रीय बाल अधिकार संरक्षण आयोग और नीति आयोग", completed: false, difficulty: "medium" },
+                { name: "लोक नीति, नागरिक चार्टर, सामाजिक अंकेक्षण और शिकायत निवारण प्रणाली", completed: false, difficulty: "medium" },
+                { name: "लोकपाल, केंद्रीय सतर्कता आयोग, केंद्रीय सूचना आयोग", completed: false, difficulty: "medium" }
+            ],
+            "राजस्थान की राजनीतिक एवं प्रशासनिक व्यवस्था": [
+                { name: "राज्यपाल, मुख्यमंत्री एवं मंत्रिपरिषद, राजस्थान विधान सभा, राजस्थान उच्च न्यायालय, अधीनस्थ न्यायालय एवं अन्य न्यायिक निकाय, महाधिवक्ता", completed: false, difficulty: "medium" },
+                { name: "मुख्य सचिव, राज्य सचिवालय, विभिन्न विभागों के निदेशालय, संभागीय आयुक्त, जिला कलेक्टर / जिला मजिस्ट्रेट, पुलिस अधीक्षक, उप–खण्ड अधिकारी, तहसीलदार", completed: false, difficulty: "medium" },
+                { name: "राजस्थान लोक सेवा आयोग, राजस्थान राज्य निर्वाचन आयोग, राजस्थान सूचना आयोग, राजस्थान राज्य महिला आयोग, राजस्व मंडल, लोकायुक्त", completed: false, difficulty: "medium" },
+                { name: "राजस्थान में पंचायती राज एवं नगर पालिकाओं का प्रशासन", completed: false, difficulty: "medium" }
+            ],
+            "आर्थिक अवधारणाएँ एवं भारतीय अर्थव्यवस्था": [
+                { name: "आर्थिक संवृद्धि और विकास। पर्यावरण क्षरण और सतत् विकास।", completed: false, difficulty: "medium" },
+                { name: "विकास के मापक– पारंपरिक माप, मानव विकास सूचकांक और अन्य संबंधित सूचकांक।", completed: false, difficulty: "medium" },
+                { name: "आर्थिक विकास में मौद्रिक और राजकोषीय नीति की भूमिका। भारत सरकार का नवीनतम बजट और संसाधन संग्रहण।", completed: false, difficulty: "hard" },
+                { name: "राजकोषीय संघवाद– केन्द्र– राज्य वित्तीय संबंध और वित्त आयोग।", completed: false, difficulty: "hard" },
+                { name: "कृषिगत विकास– संस्थागत और तकनीकी पहलू। भारतीय कृषि में सुधार–चुनौतियां और सरकारी पहल।", completed: false, difficulty: "medium" },
+                { name: "औद्योगिक वृद्धि, स्वरूप, नीति और औद्योगिक सुधार– उदारीकरण, निजीकरण और वैश्वीकरण।", completed: false, difficulty: "medium" },
+                { name: "आर्थिक वृद्धि में सेवा क्षेत्र की भूमिका– चुनौतियां और अवसर। ऊर्जा, परिवहन और संचार।", completed: false, difficulty: "medium" },
+                { name: "कौशल विकास और रोजगार संवर्द्धन– कार्यक्रम और नीतियां। सामाजिक न्याय और सशक्तिकरण", completed: false, difficulty: "easy" }
+            ],
+            "राजस्थान की अर्थव्यवस्था": [
+                { name: "अर्थव्यवस्था का वृहत् परिदृश्य और राज्य बजट।", completed: false, difficulty: "hard" },
+                { name: "कृषि, उद्योग और सेवा क्षेत्र की मौजूदा स्थिति, मुद्दे और सरकारी पहल।", completed: false, difficulty: "medium" },
+                { name: "आधारभूत संरचना का विकासः ऊर्जा, परिवहन और संचार।", completed: false, difficulty: "medium" },
+                { name: "ग्रामीण विकास, पंचायती राज और राज्य वित्त आयोग।", completed: false, difficulty: "medium" },
+                { name: "मूलभूत सामाजिक सेवाएं– शिक्षा और स्वास्थ्य।", completed: false, difficulty: "easy" },
+                { name: "राजस्थान सरकार की मुख्य कल्याणकारी योजनाएं।", completed: false, difficulty: "easy" }
+            ],
+            "विज्ञान एवं प्रौद्योगिकी": [
+                { name: "दैनिक जीवन में विज्ञान के मूलभूत तत्व।", completed: false, difficulty: "easy" },
+                { name: "कम्प्यूटर्स; सूचना एवं संचार प्रौद्योगिकी।", completed: false, difficulty: "medium" },
+                { name: "रक्षा एवं अंतरिक्ष प्रौद्योगिकी भारत के विशेष संदर्भ में।", completed: false, difficulty: "hard" },
+                { name: "वंशागति एवं विभिन्नता; अनुवांशिक–अभियांत्रिकी; जैव–प्रौद्योगिकी एवं नैनो–प्रौद्योगिकी।", completed: false, difficulty: "hard" },
+                { name: "मानव स्वास्थ्य देखभाल; आहार एवं पोषण; रोग एवं सार्वजनिक स्वास्थ्य कार्यक्रम।", completed: false, difficulty: "medium" },
+                { name: "पर्यावरणीय तथा पारिस्थितिकीय परिवर्तन एवं उनका प्रभाव मूल्यांकन।", completed: false, difficulty: "medium" },
+                { name: "जैव–विविधता; प्राकृतिक संसाधनों का संरक्षण एवं संतत् विकास।", completed: false, difficulty: "medium" },
+                { name: "राजस्थान के विशेष संदर्भ में कृषि–विज्ञान, उद्यान–विज्ञान, वानिकी एवं पशुपालन।", completed: false, difficulty: "medium" },
+                { name: "राजस्थान तथा भारत में विज्ञान एवं प्रौद्योगिकी से संबंधित प्रमुख सरकारी कार्यक्रम एवं नीतियां।", completed: false, difficulty: "medium" },
+                { name: "अभिनव वैज्ञानिक एवं प्रौद्योगिकी प्रगति; विज्ञान एवं प्रौद्योगिकी में भारतीयों का योगदान; विज्ञान एवं प्रौद्योगिकी का स्वदेशीकरण।", completed: false, difficulty: "medium" }
+            ],
+            "तार्किक दक्षता (निगमनात्मक, आगमनात्मक, अपवर्तनात्मक)": [
+                { name: "कथन एवं मान्यताएं", completed: false, difficulty: "medium" },
+                { name: "कथन एवं तर्क", completed: false, difficulty: "medium" },
+                { name: "कथन एवं निष्कर्ष", completed: false, difficulty: "medium" },
+                { name: "कथन–कार्यवाही", completed: false, difficulty: "medium" },
+                { name: "विश्लेषणात्मक तर्कक्षमता / विवेचनात्मक तर्कक्षमता", completed: false, difficulty: "hard" }
+            ],
+            "मानसिक योग्यता": [
+                { name: "संख्या / अक्षर अनुक्रम", completed: false, difficulty: "easy" },
+                { name: "कूटवाचन (कोडिंग–डीकोडिंग)", completed: false, difficulty: "easy" },
+                { name: "संबंधों से संबंधित समस्याएं", completed: false, difficulty: "medium" },
+                { name: "दिशा ज्ञान परीक्षण", completed: false, difficulty: "easy" },
+                { name: "तार्किक वेन आरेख", completed: false, difficulty: "easy" },
+                { name: "रैंकिंग एवं बैठक व्यवस्था", completed: false, difficulty: "medium" },
+                { name: "आकार और उनके उपविभाजन", completed: false, difficulty: "medium" }
+            ],
+            "आधारभूत संख्यात्मक दक्षता": [
+                { name: "अनुपात–समानुपात तथा साझा, लाभ एवं हानि", completed: false, difficulty: "medium" },
+                { name: "प्रतिशत", completed: false, difficulty: "easy" },
+                { name: "साधारण एवं चक्रवृद्धि ब्याज", completed: false, difficulty: "medium" },
+                { name: "समतलीय चित्रों के परिमाप एवं क्षेत्र", completed: false, difficulty: "hard" },
+                { name: "आंकड़ों का विश्लेषण (सारणी, दण्ड–आरेख, रेखीय आलेख, पाई–चार्ट)", completed: false, difficulty: "medium" },
+                { name: "माध्य (समांतर, गुणोत्तर एवं हरात्मक), माध्यिका एवं बहुलक", completed: false, difficulty: "medium" },
+                { name: "क्रमचय एवं संचय", completed: false, difficulty: "hard" },
+                { name: "प्रायिकता (सरल समस्याएं)", completed: false, difficulty: "medium" }
+            ],
+            "समसामयिक घटनाएँ एवं मुद्दे (राजस्थान के विशेष संदर्भ में)": [
+                { name: "महत्वपूर्ण व्यक्तित्व, स्थान और प्रासंगिक समकालीन मुद्दे", completed: false, difficulty: "easy" },
+                { name: "कल्याण और विकास से संबंधित नई योजनाएँ, कार्यक्रम और पहल", completed: false, difficulty: "easy" },
+                { name: "प्रमुख आर्थिक और राजनीतिक घटनाक्रम", completed: false, difficulty: "medium" },
+                { name: "खेल और क्रीड़ा से संबंधित महत्वपूर्ण घटनाएँ एवं उपलब्धियाँ", completed: false, difficulty: "easy" },
+                { name: "प्रमुख पुरस्कार, प्रकाशन और प्रतिष्ठित लेखक", completed: false, difficulty: "easy" },
+                { name: "राजस्थान सार्वजनिक परीक्षा (भर्ती में अनुचित साधनों की रोकथाम के अध्युपाय) अधिनियम, 2022", completed: false, difficulty: "medium" }
+            ]
+        };
+
         const APP_CONFIG = {
             brandName: "Indian AI Factory",
             subscriptionFee: 199,
             upiId: "nareshkhichar@airtel"
         };
 
-        // State Store
+        // Translations (Hindi / English)
+        const TRANSLATIONS = {
+            hi: {
+                headerSubtitle: "स्मार्ट सिलेबस & स्टडी ट्रैकर",
+                appSubtitle: "स्मार्ट सिलेबस & AI स्टडी ट्रैकर",
+                regInstruction: "ऐप अनलॉक करने के लिए अपना नाम और मोबाइल नंबर दर्ज करें:",
+                nameLabel: "आपका नाम",
+                phoneLabel: "मोबाइल नंबर",
+                sendReqBtn: "एक्सेस रिक्वेस्ट भेजें",
+                reqSubmittedNotice: "आपकी रिक्वेस्ट सबमिट हो चुकी है। तुरंत एक्टिवेट करने के लिए सब्सक्रिप्शन शुल्क पूरा करें।",
+                subPassLabel: "लाइफटाइम एक्सेस पास",
+                upiInstructions: "PhonePe / Google Pay / Paytm से ऊपर दी गई UPI ID पर <strong>₹199</strong> ट्रांसफर करें।",
+                waitApprovalMsg: "पेमेंट प्राप्त होने पर एडमिन पैनल से आपका अकाउंट तुरंत अप्रूव कर दिया जाएगा।",
+                checkStatusBtn: "अप्रूवल स्टेटस चेक करें",
+                installAppHeader: "ऐप डाउनलोड",
+                streakLabel: "दिन स्ट्रीक",
+                tabDashboard: "डैशबोर्ड",
+                tabSyllabus: "Syllabus",
+                tabTimeTable: "टाइम टेबल",
+                progressTitle: "लाइव प्रोग्रेस रिपोर्ट (Syllabus Completion)",
+                totalTopicsLabel: "कुल सब-टॉपिक्स",
+                completedTopicsLabel: "पूर्ण हुए",
+                pendingTopicsLabel: "शेष टॉपिक्स",
+                pomodoroTitle: "25-मिनट पोमोडोरो स्टडी सेशन",
+                pomodoroDesc: "एकाग्र होकर अध्ययन करें; समय पूरा होने पर स्वतः बीप अलर्ट मिलेगा।",
+                todayStudyTitle: "आज का मुख्य अध्ययन (Study Plan)",
+                todayStudyDesc: "आज के निर्धारित विषय और महत्वपूर्ण सब-टॉपिक्स",
+                todayRevTitle: "आज का रिवीज़न सेक्शन (1-3-7-21 Formula)",
+                todayRevDesc: "साइंटिफिक स्पेसड रिपीटिशन से स्वतः तय रिवीज़न टॉपिक्स",
+                scheduleNewTitle: "नया टॉपिक शेड्यूल करें",
+                scheduleNewDesc: "विषय चुनें, सब-टॉपिक चुनें और दिनांक व समय निर्धारित करें:",
+                selectSubjLabel: "1. विषय (Subject)",
+                selectTopicLabel: "2. सब-टॉपिक",
+                selectDateTimeLabel: "3. दिनांक और समय",
+                selectTypeLabel: "4. प्रकार",
+                typeStudy: "मुख्य अध्ययन (Study)",
+                typeRevision: "रिवीज़न (Revision)",
+                addToScheduleBtn: "शेड्यूल में जोड़ें",
+                syllabusCustomTitle: "सिलेबस अपडेट और कस्टमाइज़ेशन",
+                syllabusCustomDesc: "नया टॉपिक जोड़ें, Word (.docx) से अपडेट करें या डिफ़ॉल्ट सिलेबस रीस्टोर करें।",
+                restoreDefaultBtn: "डिफ़ॉल्ट सिलेबस रीस्टोर करें",
+                quickAddTitle: "⚡ क्विक न्यू टॉपिक जोड़ें:",
+                addTopicBtn: "टॉपिक जोड़ें",
+                uploadWordTitle: "Word डॉक्यूमेंट (.docx) से अपडेट करें",
+                uploadWordDesc: "विषय व सब-टॉपिक ऑटो-स्ट्रक्चर होंगे",
+                pasteTextTitle: "टेक्स्ट से बल्क अपडेट:",
+                saveTextBtn: "टेक्स्ट सेव करें",
+                syllabusDirTitle: "स्ट्रक्चर्ड विषयवार डायरेक्टरी",
+                syllabusDirDesc: "सभी 15 प्रमुख विषय और 107 सब-टॉपिक्स की संपूर्ण सूची",
+                clearAllBtn: "खाली करें",
+                ttGenTitle: "AI स्मार्ट टाइम टेबल जनरेटर",
+                ttGenDesc: "अवधि और बफर फ्रीक्वेंसी चुनकर पूरे सिलेबस का स्वचालित प्लान बनाएं:",
+                ttStartDateLabel: "शुरुआती दिनांक",
+                ttDurationLabel: "प्लान की अवधि",
+                ttSessionLabel: "प्रति सेशन समय",
+                ttFreqLabel: "फ्रीक्वेंसी / बफर",
+                freqDaily: "रोज़ाना",
+                freqAlt: "एक दिन छोड़कर",
+                freqEvery3rd: "हर 2 दिन बाद",
+                generateTTBtn: "AI टाइम टेबल जनरेट करें",
+                ttPreviewTitle: "टाइम टेबल प्रीव्यू",
+                ttPreviewDesc: "नीचे बना प्लान देखें और मुख्य डैशबोर्ड में लागू करें:",
+                applyScheduleBtn: "मुख्य शेड्यूल में लागू करें",
+                installBannerTitle: "ऐप इंस्टॉल करें",
+                installBannerDesc: "फास्ट और ऑफलाइन चलाने के लिए होम स्क्रीन पर जोड़ें",
+                installBtn: "इंस्टॉल"
+            },
+            en: {
+                headerSubtitle: "Smart Syllabus & Study Tracker",
+                appSubtitle: "Smart Syllabus & AI Study Tracker",
+                regInstruction: "Enter your name and mobile number to unlock access:",
+                nameLabel: "Your Name",
+                phoneLabel: "Mobile Number",
+                sendReqBtn: "Send Access Request",
+                reqSubmittedNotice: "Your request is submitted. Complete subscription fee for instant approval.",
+                subPassLabel: "Lifetime Access Pass",
+                upiInstructions: "Transfer <strong>₹199</strong> via PhonePe / Google Pay / Paytm to the UPI ID above.",
+                waitApprovalMsg: "Admin will verify payment and approve your account shortly.",
+                checkStatusBtn: "Check Approval Status",
+                installAppHeader: "Install App",
+                streakLabel: "Day Streak",
+                tabDashboard: "Dashboard",
+                tabSyllabus: "Syllabus",
+                tabTimeTable: "Time Table",
+                progressTitle: "Live Progress Report (Syllabus Completion)",
+                totalTopicsLabel: "Total Sub-topics",
+                completedTopicsLabel: "Completed",
+                pendingTopicsLabel: "Remaining",
+                pomodoroTitle: "25-Minute Pomodoro Study Session",
+                pomodoroDesc: "Focus and study uninterrupted; auto audio beep upon completion.",
+                todayStudyTitle: "Today's Main Study Plan",
+                todayStudyDesc: "Scheduled subjects & key sub-topics for today",
+                todayRevTitle: "Today's Revision Window (1-3-7-21 Formula)",
+                todayRevDesc: "Auto-scheduled spaced repetition revision topics",
+                scheduleNewTitle: "Schedule a Topic",
+                scheduleNewDesc: "Select subject, choose sub-topic, and set date & time:",
+                selectSubjLabel: "1. Subject",
+                selectTopicLabel: "2. Sub-topic",
+                selectDateTimeLabel: "3. Date & Time",
+                selectTypeLabel: "4. Schedule Type",
+                typeStudy: "Main Study",
+                typeRevision: "Revision",
+                addToScheduleBtn: "Add to Schedule",
+                syllabusCustomTitle: "Syllabus Update & Customization",
+                syllabusCustomDesc: "Add new topics, import from Word (.docx) or restore default structured syllabus.",
+                restoreDefaultBtn: "Restore Default Syllabus",
+                quickAddTitle: "⚡ Quick Add New Topic:",
+                addTopicBtn: "Add Topic",
+                uploadWordTitle: "Upload Word Document (.docx)",
+                uploadWordDesc: "Auto-structure subjects & sub-topics",
+                pasteTextTitle: "Bulk Update from Text:",
+                saveTextBtn: "Save Text",
+                syllabusDirTitle: "Structured Syllabus Directory",
+                syllabusDirDesc: "All 15 subjects and 107 sub-topics hierarchy",
+                clearAllBtn: "Clear",
+                ttGenTitle: "AI Smart Time Table Generator",
+                ttGenDesc: "Select duration and buffer frequency to automatically schedule your syllabus:",
+                ttStartDateLabel: "Start Date",
+                ttDurationLabel: "Plan Duration",
+                ttSessionLabel: "Session Duration",
+                ttFreqLabel: "Frequency / Buffer",
+                freqDaily: "Daily",
+                freqAlt: "Alternate Days",
+                freqEvery3rd: "Every 3rd Day",
+                generateTTBtn: "Generate AI Time Table",
+                ttPreviewTitle: "Time Table Preview",
+                ttPreviewDesc: "Review generated schedule and apply directly to your main dashboard:",
+                applyScheduleBtn: "Apply to Main Schedule",
+                installBannerTitle: "Install App",
+                installBannerDesc: "Add to home screen for ultra-fast and offline access",
+                installBtn: "Install"
+            }
+        };
+
+        let currentLang = localStorage.getItem('iaf_lang') || 'hi';
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('iaf_lang', lang);
+            document.getElementById('lang-label').innerText = (lang === 'hi') ? 'English' : 'हिंदी';
+
+            const dict = TRANSLATIONS[lang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    el.innerHTML = dict[key];
+                }
+            });
+        }
+
+        function toggleLanguage() {
+            const newLang = (currentLang === 'hi') ? 'en' : 'hi';
+            applyLanguage(newLang);
+        }
+
+        // Global State
         let syllabusData = {};
         let scheduledTasks = [];
         let timerSeconds = 25 * 60;
@@ -432,37 +990,64 @@ Indian Polity:
         let ambientAudio = null;
         let deferredPrompt = null;
 
-        // --- PWA Setup for URL Bar Install Icon ---
+        // Preview Mode Toggle (Student vs Admin)
+        function setPreviewMode(mode) {
+            const studentView = document.getElementById('student-app-view');
+            const adminView = document.getElementById('admin-portal-view');
+            const btnStudent = document.getElementById('preview-btn-student');
+            const btnAdmin = document.getElementById('preview-btn-admin');
+
+            if (mode === 'student') {
+                studentView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+                btnStudent.className = "px-3 py-1 rounded-lg font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition flex items-center gap-1.5";
+                btnAdmin.className = "px-3 py-1 rounded-lg font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition flex items-center gap-1.5";
+            } else {
+                studentView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                btnAdmin.className = "px-3 py-1 rounded-lg font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition flex items-center gap-1.5";
+                btnStudent.className = "px-3 py-1 rounded-lg font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition flex items-center gap-1.5";
+                loadAdminRequests();
+            }
+        }
+
+        function toggleLockOverlayPreview(forceState) {
+            const lockScreen = document.getElementById('device-lock-screen');
+            const toggleText = document.getElementById('lock-toggle-text');
+            const isCurrentlyHidden = lockScreen.classList.contains('hidden');
+            const shouldShow = (typeof forceState === 'boolean') ? forceState : isCurrentlyHidden;
+
+            if (shouldShow) {
+                lockScreen.classList.remove('hidden');
+                toggleText.innerText = "लॉक स्क्रीन छिपाएं";
+            } else {
+                lockScreen.classList.add('hidden');
+                toggleText.innerText = "₹199 लॉक स्क्रीन देखें";
+            }
+        }
+
+        // PWA Setup
         function setupPwaManifest() {
             const manifestObj = {
-                "name": "Indian AI Factory - Syllabus Tracker",
+                "name": "Indian AI Factory - Study Tracker",
                 "short_name": "IAF Tracker",
                 "description": "Smart Syllabus & Study Tracker by Indian AI Factory",
                 "start_url": "./index.html",
                 "display": "standalone",
-                "background_color": "#f8fafc",
-                "theme_color": "#2563eb",
+                "background_color": "#0b0f19",
+                "theme_color": "#4f46e5",
                 "icons": [
                     {
-                        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%232563eb'/><text x='96' y='125' font-size='90' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>AI</text></svg>",
+                        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='45' fill='%234f46e5'/><text x='96' y='125' font-size='90' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>AI</text></svg>",
                         "sizes": "192x192",
-                        "type": "image/svg+xml",
-                        "purpose": "any maskable"
-                    },
-                    {
-                        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%232563eb'/><text x='256' y='330' font-size='240' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>AI</text></svg>",
-                        "sizes": "512x512",
                         "type": "image/svg+xml",
                         "purpose": "any maskable"
                     }
                 ]
             };
-            const stringManifest = JSON.stringify(manifestObj);
-            const blob = new Blob([stringManifest], {type: 'application/json'});
-            const manifestURL = URL.createObjectURL(blob);
-            document.querySelector('#manifest-placeholder').setAttribute('href', manifestURL);
+            const blob = new Blob([JSON.stringify(manifestObj)], {type: 'application/json'});
+            document.querySelector('#manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
 
-            // Register dummy service worker for PWA install eligibility in Chrome
             if ('serviceWorker' in navigator) {
                 const swCode = `
                     self.addEventListener('install', e => self.skipWaiting());
@@ -470,16 +1055,20 @@ Indian Polity:
                     self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
                 `;
                 const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                const swUrl = URL.createObjectURL(swBlob);
-                navigator.serviceWorker.register(swUrl).catch(() => {});
+                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
             }
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            const btn = document.getElementById('pwa-install-header-btn');
-            if (btn) btn.classList.remove('hidden');
+            const banner = document.getElementById('pwa-install-banner');
+            if (banner) banner.classList.remove('hidden');
+            const headerBtn = document.getElementById('pwa-install-header-btn');
+            if (headerBtn) {
+                headerBtn.classList.remove('hidden');
+                headerBtn.classList.add('flex');
+            }
         });
 
         function triggerPwaInstall() {
@@ -487,25 +1076,30 @@ Indian Polity:
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then(() => {
                     deferredPrompt = null;
+                    document.getElementById('pwa-install-banner').classList.add('hidden');
                     const btn = document.getElementById('pwa-install-header-btn');
                     if (btn) btn.classList.add('hidden');
                 });
             } else {
-                alert("Browser ke upar address bar (URL) ke right corner me Install icon ya Chrome menu (⋮) -> 'Install App / Add to Home screen' par click karein.");
+                alert("Browser address bar (URL) के दाएँ कोने में Install icon या Chrome मेनू (⋮) -> 'Install App / Add to Home screen' पर क्लिक करें।");
             }
         }
 
-        // --- Tab Switching ---
+        function dismissInstallBanner() {
+            document.getElementById('pwa-install-banner').classList.add('hidden');
+        }
+
+        // Student App Tab Switcher
         function switchTab(tabId) {
             ['dashboard', 'syllabus', 'timetable'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
-                document.getElementById(`tab-btn-${t}`).className = 'py-3 text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+                document.getElementById(`tab-btn-${t}`).className = 'py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200';
             });
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            document.getElementById(`tab-btn-${tabId}`).className = 'py-3 active-tab flex items-center gap-1.5';
+            document.getElementById(`tab-btn-${tabId}`).className = 'py-2.5 rounded-xl active-ai-tab transition flex items-center justify-center gap-2';
         }
 
-        // --- Approval & Lock System ---
+        // Approval Logic with Real-time Unlock Sync
         function getDeviceId() {
             let id = localStorage.getItem('iaf_device_id');
             if (!id) {
@@ -520,8 +1114,8 @@ Indian Polity:
             const lockScreen = document.getElementById('device-lock-screen');
             if (isApproved === 'true') {
                 lockScreen.classList.add('hidden');
+                document.getElementById('lock-toggle-text').innerText = "₹199 लॉक स्क्रीन देखें";
             } else {
-                lockScreen.classList.remove('hidden');
                 const reqSent = localStorage.getItem('iaf_req_sent');
                 if (reqSent === 'true') {
                     document.getElementById('step-register').classList.add('hidden');
@@ -534,7 +1128,7 @@ Indian Polity:
             const name = document.getElementById('user-name').value.trim();
             const phone = document.getElementById('user-phone').value.trim();
             if (!name || !phone) {
-                alert('Kripya apna naam aur phone number dono bharein.');
+                alert('कृपया अपना नाम और मोबाइल नंबर दर्ज करें।');
                 return;
             }
 
@@ -544,7 +1138,7 @@ Indian Polity:
                 name,
                 phone,
                 amount: APP_CONFIG.subscriptionFee,
-                date: new Date().toLocaleDateString(),
+                date: new Date().toLocaleDateString('hi-IN'),
                 status: 'pending'
             };
 
@@ -556,11 +1150,12 @@ Indian Polity:
             localStorage.setItem('iaf_req_sent', 'true');
             document.getElementById('step-register').classList.add('hidden');
             document.getElementById('step-payment').classList.remove('hidden');
+            alert("रिक्वेस्ट सबमिट हो गई! एडमिन पैनल पर जाकर इसे तुरंत Approve कर सकते हैं।");
         }
 
         function copyUpiId() {
             navigator.clipboard.writeText(APP_CONFIG.upiId);
-            alert('UPI ID copy kar li gayi hai: ' + APP_CONFIG.upiId);
+            alert('UPI ID कॉपी हो गई है: ' + APP_CONFIG.upiId);
         }
 
         function checkStatusManual() {
@@ -571,66 +1166,120 @@ Indian Polity:
             if (myReq && myReq.status === 'approved') {
                 localStorage.setItem('iaf_user_approved', 'true');
                 document.getElementById('device-lock-screen').classList.add('hidden');
-                alert('Badhai ho! Aapka access approve aur activate ho gaya hai.');
+                document.getElementById('lock-toggle-text').innerText = "₹199 लॉक स्क्रीन देखें";
+                alert('बधाई हो! आपका सब्सक्रिप्शन एक्टिवेट हो गया है।');
             } else {
-                alert('Abhi approval pending hai. Kripya thoda wait karein ya admin se contact karein.');
+                alert('अभी अप्रूवल पेंडिंग है। ऊपर "एडमिन पैनल" में जाकर Approve पर क्लिक करें।');
             }
         }
 
-        // --- Structured Syllabus Parsing (Hierarchical Sub-topics) ---
+        // Guaranteed Pre-load of Syllabus
+        function loadSyllabusFromStorage() {
+            const data = localStorage.getItem('iaf_syllabus_data_v2');
+            if (data && data !== '{}') {
+                try {
+                    syllabusData = JSON.parse(data);
+                } catch(e) {
+                    syllabusData = JSON.parse(JSON.stringify(DEFAULT_RAS_SYLLABUS));
+                }
+            } else {
+                // Instantly load the 15 subjects & 107 subtopics
+                syllabusData = JSON.parse(JSON.stringify(DEFAULT_RAS_SYLLABUS));
+                localStorage.setItem('iaf_syllabus_data_v2', JSON.stringify(syllabusData));
+            }
+            populateSubjectDropdown();
+            renderSyllabusDirectory();
+            updateProgressStats();
+        }
+
+        function saveSyllabus() {
+            localStorage.setItem('iaf_syllabus_data_v2', JSON.stringify(syllabusData));
+            populateSubjectDropdown();
+            renderSyllabusDirectory();
+            updateProgressStats();
+        }
+
+        function restoreDefaultRASSyllabus() {
+            if (confirm('क्या आप डिफ़ॉल्ट 15 विषय व 107 सब-टॉपिक्स का पूरा सिलेबस रीस्टोर करना चाहते हैं?')) {
+                syllabusData = JSON.parse(JSON.stringify(DEFAULT_RAS_SYLLABUS));
+                saveSyllabus();
+                alert('डिफ़ॉल्ट सिलेबस सफलतापूर्वक रीस्टोर हो गया!');
+            }
+        }
+
+        function clearAllSyllabus() {
+            if (confirm('क्या आप सच में संपूर्ण सिलेबस हटाना चाहते हैं?')) {
+                syllabusData = {};
+                saveSyllabus();
+            }
+        }
+
+        function addCustomTopicDirect() {
+            const subj = document.getElementById('custom-subject-input').value.trim();
+            const topic = document.getElementById('custom-topic-input').value.trim();
+            if (!subj || !topic) {
+                alert('कृपया विषय और सब-टॉपिक दोनों भरें।');
+                return;
+            }
+            if (!syllabusData[subj]) syllabusData[subj] = [];
+            syllabusData[subj].push({
+                name: topic,
+                completed: false,
+                difficulty: 'medium'
+            });
+            saveSyllabus();
+            document.getElementById('custom-topic-input').value = '';
+            alert(`'${topic}' को '${subj}' में जोड़ दिया गया!`);
+        }
+
+        function deleteSubTopic(subject, topicName) {
+            if (confirm(`क्या आप '${topicName}' को डिलीट करना चाहते हैं?`)) {
+                if (syllabusData[subject]) {
+                    syllabusData[subject] = syllabusData[subject].filter(t => t.name !== topicName);
+                    if (syllabusData[subject].length === 0) {
+                        delete syllabusData[subject];
+                    }
+                    saveSyllabus();
+                }
+            }
+        }
+
         function parseSyllabusText(rawText) {
             const lines = rawText.split('\n');
-            let currentSubject = "General Studies";
+            let currentSubject = "सामान्य अध्ययन";
 
             lines.forEach(line => {
                 let clean = line.trim();
                 if (!clean) return;
 
-                // Identify Subject Header: ends with colon OR starts with # OR short line without bullet
-                if (clean.endsWith(':') || clean.startsWith('#') || (!clean.startsWith('-') && !clean.startsWith('*') && !clean.startsWith('•') && clean.length < 40 && !/^\d+[\.\)]/.test(clean))) {
-                    currentSubject = clean.replace(/^#+\s*/, '').replace(/[:\-]/g, '').trim();
+                if (clean.endsWith(':') || clean.endsWith('ः') || clean.startsWith('#') || (!clean.startsWith('-') && !clean.startsWith('*') && clean.length < 45 && !/^\d+[\.\)]/.test(clean))) {
+                    currentSubject = clean.replace(/^#+\s*/, '').replace(/[:\-ः]/g, '').trim();
                     if (!syllabusData[currentSubject]) {
                         syllabusData[currentSubject] = [];
                     }
                 } else {
-                    // Check if multiple sub-topics are comma separated
                     let topicLine = clean.replace(/^[\-*•\d.]+\s*/, '').trim();
-                    if (topicLine.includes(',') && !topicLine.includes('(')) {
-                        const parts = topicLine.split(',');
-                        parts.forEach(p => {
-                            const subName = p.trim();
-                            addSubTopic(currentSubject, subName);
-                        });
-                    } else {
-                        addSubTopic(currentSubject, topicLine);
+                    if (topicLine.length > 1) {
+                        if (!syllabusData[currentSubject]) syllabusData[currentSubject] = [];
+                        if (!syllabusData[currentSubject].some(t => t.name.toLowerCase() === topicLine.toLowerCase())) {
+                            syllabusData[currentSubject].push({
+                                name: topicLine,
+                                completed: false,
+                                difficulty: 'medium'
+                            });
+                        }
                     }
                 }
             });
-
             saveSyllabus();
-        }
-
-        function addSubTopic(subject, topicName) {
-            if (!topicName || topicName.length < 2) return;
-            if (!syllabusData[subject]) syllabusData[subject] = [];
-            if (!syllabusData[subject].some(t => t.name.toLowerCase() === topicName.toLowerCase())) {
-                syllabusData[subject].push({
-                    name: topicName,
-                    completed: false,
-                    difficulty: 'medium'
-                });
-            }
         }
 
         function parseAndSavePastedText() {
             const text = document.getElementById('raw-syllabus-input').value.trim();
-            if (!text) {
-                alert('Kripya syllabus text paste karein.');
-                return;
-            }
+            if (!text) return;
             parseSyllabusText(text);
             document.getElementById('raw-syllabus-input').value = '';
-            alert('Syllabus successfully structure aur save ho gaya!');
+            alert('सिलेबस सफलतापूर्वक अपडेट हो गया!');
         }
 
         function handleWordUpload(e) {
@@ -642,96 +1291,54 @@ Indian Polity:
                 mammoth.extractRawText({ arrayBuffer: event.target.result })
                     .then(result => {
                         parseSyllabusText(result.value);
-                        alert(`Word document '${file.name}' se syllabus aur sub-topics successfully structure ho gaye!`);
+                        alert(`Word फाइल '${file.name}' से सिलेबस सफलतापूर्वक अपडेट हो गया!`);
                     })
-                    .catch(err => alert('Word file read karne me error: ' + err.message));
+                    .catch(err => alert('Word फाइल पार्स करने में त्रुटि: ' + err.message));
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function loadSampleSyllabus() {
-            syllabusData = {
-                "Rajasthan History": [
-                    { name: "Kalibangan & Ahar Civilization", completed: true, difficulty: "easy" },
-                    { name: "Major Rajput Dynasties & Governance", completed: false, difficulty: "medium" },
-                    { name: "1857 Revolution & Peasant Movements", completed: false, difficulty: "hard" },
-                    { name: "Integration of Rajasthan", completed: false, difficulty: "easy" }
-                ],
-                "Rajasthan Geography": [
-                    { name: "Physical Divisions & Landforms", completed: false, difficulty: "medium" },
-                    { name: "Climate, Rivers & Lakes", completed: false, difficulty: "hard" },
-                    { name: "Forests, Wildlife & Minerals", completed: false, difficulty: "easy" }
-                ],
-                "Indian Polity & Governance": [
-                    { name: "Preamble & Fundamental Rights", completed: true, difficulty: "medium" },
-                    { name: "Directive Principles & Duties", completed: false, difficulty: "easy" },
-                    { name: "Governor, Chief Minister & State Legislature", completed: false, difficulty: "medium" }
-                ]
-            };
-            saveSyllabus();
-            alert('Demo structured syllabus successfully load ho gaya!');
-        }
-
-        function saveSyllabus() {
-            localStorage.setItem('iaf_syllabus_data', JSON.stringify(syllabusData));
-            populateSubjectDropdown();
-            renderSyllabusDirectory();
-            updateProgressStats();
-        }
-
-        function loadSyllabusFromStorage() {
-            const data = localStorage.getItem('iaf_syllabus_data');
-            if (data) {
-                try { syllabusData = JSON.parse(data); } catch(e) { syllabusData = {}; }
-            }
-            populateSubjectDropdown();
-            renderSyllabusDirectory();
-            updateProgressStats();
-        }
-
-        function clearAllSyllabus() {
-            if (confirm('Kya aap sach me pura syllabus hatana chahte hain?')) {
-                syllabusData = {};
-                saveSyllabus();
-            }
-        }
-
-        // --- Render Structured Directory (Hierarchical Sub-topics) ---
         function renderSyllabusDirectory() {
             const container = document.getElementById('syllabus-directory');
             container.innerHTML = '';
             const subjects = Object.keys(syllabusData);
 
             if (subjects.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 italic">Abhi koi syllabus saved nahi hai. Word file ya text se add karein.</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-500 italic p-4 text-center">कोई सिलेबस मौजूद नहीं है। ऊपर से रीस्टोर करें।</p>`;
                 return;
             }
 
-            subjects.forEach(sub => {
+            subjects.forEach((sub, subIdx) => {
                 const topics = syllabusData[sub];
                 const doneCount = topics.filter(t => t.completed).length;
                 const pct = topics.length ? Math.round((doneCount / topics.length) * 100) : 0;
 
                 const card = document.createElement('div');
-                card.className = "border border-slate-200 rounded-xl p-4 bg-slate-50/70";
+                card.className = "glass-card rounded-2xl p-4 border border-slate-700/60 transition";
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
-                        <span class="font-bold text-xs sm:text-sm text-slate-800 flex items-center gap-1.5">
-                            <i class="fa-solid fa-folder text-blue-500"></i> ${sub}
+                        <span class="font-bold text-xs sm:text-sm text-white flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-mono text-[11px]">${subIdx + 1}</span>
+                            <span>${sub}</span>
                         </span>
-                        <span class="text-xs font-semibold text-blue-600">${pct}% Done (${doneCount}/${topics.length})</span>
+                        <span class="text-xs font-semibold text-indigo-400 font-mono">${pct}% (${doneCount}/${topics.length})</span>
                     </div>
-                    <div class="w-full bg-slate-200 rounded-full h-1.5 mb-3">
-                        <div class="bg-blue-600 h-1.5 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                    <div class="w-full bg-slate-900 rounded-full h-1.5 mb-3 overflow-hidden">
+                        <div class="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
                     </div>
-                    <div class="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+                    <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                         ${topics.map((t, idx) => `
-                            <div class="flex items-center justify-between text-xs bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-2xs">
-                                <span class="flex items-center gap-2 ${t.completed ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">
-                                    <span class="text-[10px] text-slate-400 font-mono">${idx + 1}.</span>
+                            <div class="flex items-center justify-between text-xs bg-slate-900/60 px-3 py-2 rounded-xl border border-slate-800">
+                                <span class="flex items-center gap-2 ${t.completed ? 'line-through text-slate-500' : 'text-slate-300'}">
+                                    <span class="text-[10px] text-slate-500 font-mono">${idx + 1}.</span>
                                     <span>${t.name}</span>
                                 </span>
-                                <span class="text-[10px] uppercase font-semibold px-2 py-0.5 rounded ${t.difficulty === 'hard' ? 'bg-red-100 text-red-600' : t.difficulty === 'easy' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}">${t.difficulty}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] uppercase font-semibold px-2 py-0.5 rounded ${t.difficulty === 'hard' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : t.difficulty === 'easy' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">${t.difficulty}</span>
+                                    <button onclick="deleteSubTopic('${sub.replace(/'/g, "\\\'")}', '${t.name.replace(/'/g, "\\'")}')" title="Delete" class="text-slate-500 hover:text-red-400 transition">
+                                        <i class="fa-regular fa-trash-can text-[11px]"></i>
+                                    </button>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -740,10 +1347,9 @@ Indian Polity:
             });
         }
 
-        // --- Dropdowns ---
         function populateSubjectDropdown() {
             const subSelect = document.getElementById('sched-subject-select');
-            subSelect.innerHTML = '<option value="">Subject chunein...</option>';
+            subSelect.innerHTML = '<option value="">विषय चुनें...</option>';
             Object.keys(syllabusData).forEach(subj => {
                 const opt = document.createElement('option');
                 opt.value = subj;
@@ -759,7 +1365,7 @@ Indian Polity:
             topSelect.innerHTML = '';
 
             if (!subj || !syllabusData[subj] || syllabusData[subj].length === 0) {
-                topSelect.innerHTML = '<option value="">Koi sub-topic uplabdh nahi</option>';
+                topSelect.innerHTML = '<option value="">कोई सब-टॉपिक उपलब्ध नहीं</option>';
                 return;
             }
 
@@ -771,7 +1377,6 @@ Indian Polity:
             });
         }
 
-        // --- Task Scheduling ---
         function scheduleTask() {
             const subject = document.getElementById('sched-subject-select').value;
             const topic = document.getElementById('sched-topic-select').value;
@@ -779,7 +1384,7 @@ Indian Polity:
             const type = document.getElementById('sched-type').value;
 
             if (!subject || !topic) {
-                alert('Kripya subject aur sub-topic dono chunein.');
+                alert('कृपया विषय और सब-टॉपिक दोनों चुनें।');
                 return;
             }
 
@@ -794,19 +1399,40 @@ Indian Polity:
 
             scheduledTasks.push(task);
             saveScheduledTasks();
-            alert(`'${topic}' ko schedule me add kar diya gaya!`);
+            alert(`'${topic}' को शेड्यूल में जोड़ दिया गया!`);
         }
 
         function saveScheduledTasks() {
-            localStorage.setItem('iaf_scheduled_tasks', JSON.stringify(scheduledTasks));
+            localStorage.setItem('iaf_scheduled_tasks_v2', JSON.stringify(scheduledTasks));
             renderScheduledWindows();
             updateProgressStats();
         }
 
         function loadScheduledTasks() {
-            const saved = localStorage.getItem('iaf_scheduled_tasks');
+            const saved = localStorage.getItem('iaf_scheduled_tasks_v2');
             if (saved) {
                 try { scheduledTasks = JSON.parse(saved); } catch(e) { scheduledTasks = []; }
+            } else {
+                scheduledTasks = [
+                    {
+                        id: 'TSK-1',
+                        subject: "राजस्थान का इतिहास, कला, संस्कृति, साहित्य, परम्परा एवं विरासत",
+                        topic: "राजस्थान के प्रागैतिहासिक स्थल पुरापाषाण काल से लेकर ताम्रपाषाण काल तक और कांस्य युग, प्राचीन राजस्थान का समाज और संस्कृति",
+                        datetime: new Date().toISOString(),
+                        type: 'study',
+                        completed: false
+                    },
+                    {
+                        id: 'TSK-2',
+                        subject: "भारतीय संविधान, राजनीतिक व्यवस्था और शासन",
+                        topic: "संविधान का निर्माण, उद्देशिका, नागरिकता, मौलिक अधिकार, राज्य की नीति के निदेशक तत्व और मौलिक कर्तव्य",
+                        datetime: new Date().toISOString(),
+                        type: 'revision',
+                        completed: false
+                    }
+                ];
+                saveScheduledTasks();
+                return;
             }
             renderScheduledWindows();
         }
@@ -825,13 +1451,13 @@ Indian Polity:
             document.getElementById('rev-badge-count').innerText = `${todayRev.length} Revisions`;
 
             if (todayStudy.length === 0) {
-                studyContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Aaj koi mukhya study schedule nahi hai. Niche se schedule karein.</p>`;
+                studyContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">आज के लिए कोई मुख्य विषय शेड्यूल नहीं है।</p>`;
             } else {
                 todayStudy.forEach(t => studyContainer.appendChild(createTaskCard(t)));
             }
 
             if (todayRev.length === 0) {
-                revContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Aaj revision ke liye koi topic pending nahi hai.</p>`;
+                revContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">आज रिवीज़न के लिए कोई टॉपिक पेंडिंग नहीं है।</p>`;
             } else {
                 todayRev.forEach(t => revContainer.appendChild(createTaskCard(t)));
             }
@@ -839,22 +1465,22 @@ Indian Polity:
 
         function createTaskCard(t) {
             const div = document.createElement('div');
-            div.className = `flex items-center justify-between p-3 rounded-xl border transition ${t.completed ? 'bg-emerald-50/60 border-emerald-200' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`;
+            div.className = `flex items-center justify-between p-3 rounded-2xl border transition ${t.completed ? 'bg-emerald-950/20 border-emerald-500/30' : 'glass-card border-slate-700/60'}`;
             
             const timeFormatted = t.datetime ? new Date(t.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
             div.innerHTML = `
                 <div class="flex items-center gap-3">
-                    <input type="checkbox" onchange="toggleComplete('${t.id}')" ${t.completed ? 'checked' : ''} class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
+                    <input type="checkbox" onchange="toggleComplete('${t.id}')" ${t.completed ? 'checked' : ''} class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer bg-slate-900 border-slate-700">
                     <div>
-                        <div class="text-xs font-bold ${t.completed ? 'line-through text-slate-400' : 'text-slate-800'}">${t.topic}</div>
-                        <div class="text-[11px] text-slate-500 flex items-center gap-2">
-                            <span><i class="fa-solid fa-book-bookmark text-blue-500"></i> ${t.subject}</span>
-                            ${timeFormatted ? `<span><i class="fa-regular fa-clock text-slate-400"></i> ${timeFormatted}</span>` : ''}
+                        <div class="text-xs font-bold ${t.completed ? 'line-through text-slate-500' : 'text-white'}">${t.topic}</div>
+                        <div class="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                            <span class="text-indigo-400"><i class="fa-solid fa-bookmark text-[10px]"></i> ${t.subject}</span>
+                            ${timeFormatted ? `<span><i class="fa-regular fa-clock text-slate-500"></i> ${timeFormatted}</span>` : ''}
                         </div>
                     </div>
                 </div>
-                <button onclick="deleteTask('${t.id}')" class="text-slate-400 hover:text-red-500 text-xs px-2 py-1">
+                <button onclick="deleteTask('${t.id}')" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition">
                     <i class="fa-regular fa-trash-can"></i>
                 </button>
             `;
@@ -872,16 +1498,16 @@ Indian Polity:
                 if (subTopic) subTopic.completed = task.completed;
             }
 
-            // 1-3-7-21 SRS Scheduling on Complete
+            // 1-3-7-21 SRS Formula
             if (task.completed && task.type === 'study') {
-                if (confirm(`'${task.topic}' complete hua! Kya aap ise 1-3-7-21 scientific revision me auto-schedule karna chahte hain?`)) {
+                if (confirm(`'${task.topic}' पूर्ण हुआ! क्या इसे 1-3-7-21 वैज्ञानिक रिवीज़न में स्वतः जोड़ना चाहते हैं?`)) {
                     [1, 3, 7, 21].forEach(days => {
                         const futureDate = new Date();
                         futureDate.setDate(futureDate.getDate() + days);
                         scheduledTasks.push({
                             id: 'REV-' + Date.now() + '-' + days,
                             subject: task.subject,
-                            topic: `${task.topic} (${days} Day Revision)`,
+                            topic: `${task.topic} (${days} दिन रिवीज़न)`,
                             datetime: futureDate.toISOString(),
                             type: 'revision',
                             completed: false
@@ -915,10 +1541,9 @@ Indian Polity:
             document.getElementById('stat-completed-topics').innerText = done;
             document.getElementById('stat-pending-topics').innerText = total - done;
             document.getElementById('overall-progress-bar').style.width = pct + '%';
-            document.getElementById('overall-percentage').innerText = pct + '% Complete';
+            document.getElementById('overall-percentage').innerText = pct + '% Completed';
         }
 
-        // --- Time Table Generator ---
         function generateTimeTablePreview() {
             const startDateVal = document.getElementById('tt-start-date').value;
             const duration = parseInt(document.getElementById('tt-duration').value);
@@ -933,7 +1558,7 @@ Indian Polity:
             });
 
             if (allTopics.length === 0) {
-                alert('Syllabus me koi pending sub-topic nahi mila! Pehle syllabus add karein.');
+                alert('सिलेबस में कोई पेंडिंग टॉपिक नहीं मिला!');
                 return;
             }
 
@@ -964,16 +1589,16 @@ Indian Polity:
 
             generatedPlan.forEach(p => {
                 const row = document.createElement('div');
-                row.className = "flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs";
+                row.className = "flex items-center justify-between p-3 glass-card rounded-2xl text-xs border border-slate-700/50";
                 row.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <span class="font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">${p.displayDate}</span>
+                        <span class="font-bold text-cyan-300 bg-cyan-950/40 px-2.5 py-1 rounded-xl border border-cyan-500/30 font-mono">${p.displayDate}</span>
                         <div>
-                            <span class="font-bold text-slate-800">${p.topic}</span>
-                            <div class="text-[11px] text-slate-500">${p.subject} • ${p.duration} Min Session</div>
+                            <span class="font-bold text-white">${p.topic}</span>
+                            <div class="text-[11px] text-slate-400">${p.subject} • ${p.duration} मिनट सेशन</div>
                         </div>
                     </div>
-                    <span class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-medium">Scheduled</span>
+                    <span class="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded font-medium">Scheduled</span>
                 `;
                 previewContent.appendChild(row);
             });
@@ -996,11 +1621,10 @@ Indian Polity:
             });
 
             saveScheduledTasks();
-            alert('Time table aapke main dashboard study schedule me successfully apply ho gaya!');
+            alert('पूरा टाइम टेबल आपके मुख्य डैशबोर्ड शेड्यूल में सफलतापूर्वक लागू हो गया!');
             switchTab('dashboard');
         }
 
-        // --- Pomodoro Timer ---
         function toggleTimer() {
             const btn = document.getElementById('timer-btn');
             if (isTimerRunning) {
@@ -1017,8 +1641,8 @@ Indian Polity:
                     } else {
                         clearInterval(timerInterval);
                         isTimerRunning = false;
-                        document.getElementById('beep-audio').play().catch(()=>{});
-                        alert('Pomodoro session complete hua! 5 minute ka break lein.');
+                        playAlertBeep();
+                        alert('पोमोडोरो सेशन पूरा हुआ! अब 5 मिनट का ब्रेक लें।');
                         resetTimer();
                     }
                 }, 1000);
@@ -1040,7 +1664,25 @@ Indian Polity:
                 `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         }
 
-        // --- Ambient Sound ---
+        function playAlertBeep() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            } catch(e) {
+                const el = document.getElementById('beep-audio');
+                if (el) el.play().catch(()=>{});
+            }
+        }
+
         function toggleAmbientSound() {
             const btn = document.getElementById('ambient-btn');
             if (!ambientAudio) {
@@ -1050,19 +1692,149 @@ Indian Polity:
 
             if (ambientAudio.paused) {
                 ambientAudio.play().then(() => {
-                    btn.classList.add('bg-blue-600', 'text-white');
-                    btn.classList.remove('text-slate-600');
+                    btn.classList.add('bg-indigo-600', 'text-white');
+                    btn.classList.remove('text-slate-400');
                 }).catch(() => {});
             } else {
                 ambientAudio.pause();
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('text-slate-600');
+                btn.classList.remove('bg-indigo-600', 'text-white');
+                btn.classList.add('text-slate-400');
             }
         }
 
-        // Init
+        // ==========================================
+        // ADMIN PORTAL SCRIPT & LOGIC
+        // ==========================================
+        function getStoredAdminPin() {
+            return localStorage.getItem('iaf_admin_pin') || "9999";
+        }
+
+        function verifyAdminPin() {
+            const entered = document.getElementById('admin-pin').value;
+            const validPin = getStoredAdminPin();
+            if (entered === validPin) {
+                document.getElementById('admin-login-modal').classList.add('hidden');
+                document.getElementById('admin-main-content').classList.remove('hidden');
+                loadAdminRequests();
+            } else {
+                alert('गलत PIN! कृपया सही मास्टर PIN (9999) दर्ज करें।');
+            }
+        }
+
+        function adminLogout() {
+            document.getElementById('admin-login-modal').classList.remove('hidden');
+            document.getElementById('admin-main-content').classList.add('hidden');
+            document.getElementById('admin-pin').value = '';
+        }
+
+        function openChangePinModal() {
+            document.getElementById('old-pin-input').value = '';
+            document.getElementById('new-pin-input').value = '';
+            document.getElementById('change-pin-modal').classList.remove('hidden');
+        }
+
+        function closeChangePinModal() {
+            document.getElementById('change-pin-modal').classList.add('hidden');
+        }
+
+        function saveNewAdminPin() {
+            const oldPin = document.getElementById('old-pin-input').value;
+            const newPin = document.getElementById('new-pin-input').value.trim();
+            const currentPin = getStoredAdminPin();
+
+            if (oldPin !== currentPin) {
+                alert('पुराना PIN गलत है!');
+                return;
+            }
+            if (!newPin || newPin.length < 4) {
+                alert('नया PIN कम से कम 4 अंकों का होना चाहिए।');
+                return;
+            }
+
+            localStorage.setItem('iaf_admin_pin', newPin);
+            alert('मास्टर PIN सफलतापूर्वक बदल दिया गया है!');
+            closeChangePinModal();
+        }
+
+        function loadAdminRequests() {
+            const reqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
+            const tbody = document.getElementById('request-table-body');
+            
+            document.getElementById('stat-total-requests').innerText = reqs.length;
+            document.getElementById('stat-approved-requests').innerText = reqs.filter(r => r.status === 'approved').length;
+            document.getElementById('stat-pending-requests').innerText = reqs.filter(r => r.status === 'pending').length;
+
+            if (reqs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">अभी कोई रिक्वेस्ट मौजूद नहीं है। छात्र पोर्टल पर जाकर 'Access Request' भेजें।</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = reqs.map(r => `
+                <tr class="hover:bg-slate-800/40 transition">
+                    <td class="p-3.5">
+                        <div class="font-bold text-white">${r.name || 'Anonymous'}</div>
+                        <div class="text-[11px] text-slate-400">${r.phone || 'N/A'}</div>
+                    </td>
+                    <td class="p-3.5 font-mono text-[11px] text-cyan-300 font-bold">${r.deviceId}</td>
+                    <td class="p-3.5 font-bold text-indigo-300">₹${r.amount || 199}</td>
+                    <td class="p-3.5 text-slate-400">${r.date || 'N/A'}</td>
+                    <td class="p-3.5">
+                        ${r.status === 'approved' 
+                            ? '<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-semibold text-[10px]">Approved</span>'
+                            : '<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-semibold text-[10px]">Pending</span>'
+                        }
+                    </td>
+                    <td class="p-3.5 text-center space-x-1.5">
+                        ${r.status !== 'approved' ? `
+                            <button onclick="updateStatus('${r.deviceId}', 'approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-xl text-[11px] font-semibold transition shadow">
+                                <i class="fa-solid fa-check mr-1"></i> Approve
+                            </button>
+                        ` : `
+                            <button onclick="updateStatus('${r.deviceId}', 'pending')" class="bg-red-500/80 hover:bg-red-500 text-white px-3 py-1 rounded-xl text-[11px] font-semibold transition">
+                                <i class="fa-solid fa-ban mr-1"></i> Revoke
+                            </button>
+                        `}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStatus(deviceId, newStatus) {
+            let reqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
+            reqs = reqs.map(r => {
+                if (r.deviceId === deviceId) {
+                    return { ...r, status: newStatus };
+                }
+                return r;
+            });
+            localStorage.setItem('iaf_all_requests', JSON.stringify(reqs));
+
+            // Instant Unlock Sync in Student View
+            const myDevId = getDeviceId();
+            if (myDevId === deviceId) {
+                if (newStatus === 'approved') {
+                    localStorage.setItem('iaf_user_approved', 'true');
+                    document.getElementById('device-lock-screen').classList.add('hidden');
+                    document.getElementById('lock-toggle-text').innerText = "₹199 लॉक स्क्रीन देखें";
+                } else {
+                    localStorage.removeItem('iaf_user_approved');
+                }
+            }
+
+            loadAdminRequests();
+            alert(`डिवाइस ${deviceId} को सफलतापूर्वक '${newStatus}' कर दिया गया है!`);
+        }
+
+        // Live Cross-Tab Synchronization
+        window.addEventListener('storage', () => {
+            checkDeviceApproval();
+            loadAdminRequests();
+        });
+
+        // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
             setupPwaManifest();
+            applyLanguage(currentLang);
             document.getElementById('tt-start-date').value = new Date().toISOString().split('T')[0];
             checkDeviceApproval();
             loadSyllabusFromStorage();

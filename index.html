@@ -10,7 +10,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="IAF Tracker">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%234f46e5'/><text x='50' y='68' font-size='50' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>AI</text></svg>">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="icon-192.png"><rect width='100' height='100' rx='25' fill='%234f46e5'/><text x='50' y='68' font-size='50' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>AI</text></svg>">
     
     <link rel="manifest" href="manifest.json">
 
@@ -125,9 +126,7 @@
             <div class="absolute -top-16 -left-16 w-36 h-36 bg-indigo-600/20 rounded-full blur-2xl pointer-events-none"></div>
             <div class="absolute -bottom-16 -right-16 w-36 h-36 bg-cyan-600/20 rounded-full blur-2xl pointer-events-none"></div>
 
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg shadow-indigo-500/30">
-                <i class="fa-solid fa-brain"></i>
-            </div>
+            <img src="logo.png" alt="Indian AI Factory Logo" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-cyan-400/50 shadow-xl shadow-cyan-500/20 object-cover">
             <h2 class="text-2xl font-extrabold text-white tracking-tight">Indian AI Factory</h2>
             <p class="text-xs text-indigo-300 mb-6 font-medium" data-i18n="appSubtitle">Smart Syllabus & AI Study Tracker</p>
 
@@ -187,9 +186,7 @@
     <header class="glass-panel border-b border-slate-800/80 sticky top-0 z-30 shadow-lg">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-500/20">
-                    AI
-                </div>
+                <img src="logo.png" alt="IAF Logo" class="w-9 h-9 rounded-xl border border-indigo-500/30 shadow-md shadow-indigo-500/20 object-cover">
                 <div>
                     <h1 class="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none">Indian AI Factory</h1>
                     <p class="text-[11px] text-slate-400 leading-none mt-1" data-i18n="headerSubtitle">Smart Syllabus & Study Tracker</p>
@@ -783,31 +780,39 @@
             }
 
             const btn = document.getElementById('submit-req-btn');
-            btn.innerHTML = '<span>रिक्वेस्ट भेजी जा रही है...</span>';
+            btn.innerHTML = '<span>रिक्वेस्ट सबमिट हो रही है...</span>';
 
             const deviceId = getDeviceId();
+            const dateStr = new Date().toLocaleDateString('hi-IN');
             const requestObj = {
                 action: "register",
                 deviceId: deviceId,
                 name: name,
                 phone: phone,
                 amount: APP_CONFIG.subscriptionFee,
-                date: new Date().toLocaleDateString('hi-IN')
+                date: dateStr
             };
 
-            // 1. Post to Google Sheet Cloud Webhook
+            // 1. Send via POST (text/plain avoids preflight CORS blockage in Apps Script)
             fetch(GOOGLE_SHEET_URL, {
                 method: "POST",
                 mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify(requestObj)
             }).then(() => {
-                console.log("Sheet me live request submit ho gayi.");
-            }).catch(err => {
-                console.error("Cloud send error:", err);
-            });
+                console.log("POST request sent to Sheet");
+            }).catch(e => console.error("POST error:", e));
 
-            // 2. Local fallback
+            // 2. Also send via GET fallback (100% immune to CORS issues)
+            const getParams = new URLSearchParams(requestObj).toString();
+            fetch(GOOGLE_SHEET_URL + "?" + getParams, {
+                method: "GET",
+                mode: "no-cors"
+            }).then(() => {
+                console.log("GET fallback sent to Sheet");
+            }).catch(e => console.error("GET error:", e));
+
+            // 3. Local storage backup
             let allReqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
             allReqs = allReqs.filter(r => r.deviceId !== deviceId);
             allReqs.push({ ...requestObj, status: 'pending' });

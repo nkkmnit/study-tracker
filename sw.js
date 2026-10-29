@@ -1,8 +1,11 @@
-const CACHE_NAME = 'iaf-tracker-v1';
+const CACHE_NAME = 'iaf-tracker-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './logo.png',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {

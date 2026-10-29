@@ -3,72 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indian AI Factory - Syllabus Tracker</title>
+    <title>Indian AI Factory - Smart Syllabus & Study Tracker</title>
+    
+    <!-- PWA Meta tags for Chrome Install Icon -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="IAF Tracker">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text x='50' y='68' font-size='50' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>AI</text></svg>">
+    
+    <!-- Manifest injected dynamically via JS for single-file PWA support -->
+    <link id="manifest-placeholder" rel="manifest">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Mammoth for Word Docs (.docx) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
     <style>
         .active-tab {
             border-bottom: 3px solid #2563eb;
             color: #2563eb;
-            font-weight: 600;
+            font-weight: 700;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans pb-16">
 
-    <!-- Approval Lock Screen Overlay -->
+    <!-- 1. Subscription & Approval Lock Screen Overlay -->
     <div id="device-lock-screen" class="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center border border-slate-200">
-            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
                 <i class="fa-solid fa-graduation-cap"></i>
             </div>
             <h2 class="text-2xl font-bold text-slate-900 mb-1">Indian AI Factory</h2>
-            <p class="text-sm text-slate-500 mb-6">Smart Syllabus & Study Tracker</p>
+            <p class="text-xs text-slate-500 mb-5 font-medium tracking-wide">Smart Syllabus & Study Tracker</p>
 
             <!-- Registration Step -->
             <div id="step-register">
-                <p class="text-sm text-slate-600 mb-4 text-left">App access pane ke liye niche apna naam aur mobile number darj karein:</p>
+                <p class="text-xs text-slate-600 mb-4 text-left">App access pane ke liye apna naam aur mobile number darj karein:</p>
                 <div class="space-y-3 mb-4 text-left">
                     <div>
-                        <label class="text-xs font-semibold text-slate-600">Aapka Naam</label>
-                        <input type="text" id="user-name" placeholder="Apna naam likhein" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label class="text-xs font-semibold text-slate-700">Aapka Naam</label>
+                        <input type="text" id="user-name" placeholder="Apna pura naam likhein" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
-                        <label class="text-xs font-semibold text-slate-600">Mobile Number</label>
-                        <input type="tel" id="user-phone" placeholder="10-digit mobile number" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label class="text-xs font-semibold text-slate-700">Mobile Number</label>
+                        <input type="tel" id="user-phone" placeholder="10 anko ka mobile number" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                 </div>
-                <button onclick="submitApprovalRequest()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition shadow-md">
-                    Access Request Bhejein
+                <button onclick="submitApprovalRequest()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition shadow-md flex items-center justify-center gap-2">
+                    <span>Access Request Bhejein</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
                 </button>
             </div>
 
             <!-- Payment / Approval Waiting Step -->
             <div id="step-payment" class="hidden text-left">
-                <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg mb-4 text-xs text-amber-800">
-                    <i class="fa-solid fa-clock mr-1"></i> Aapki request bhej di gayi hai. Access activate karne ke liye subscription complete karein.
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg mb-4 text-xs text-amber-800 flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info mt-0.5 text-amber-600"></i>
+                    <div>Aapki request submit ho gayi hai. Access chalu karne ke liye subscription shulk pura karein.</div>
                 </div>
 
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4">
                     <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-medium text-slate-500">Subscription Fee</span>
-                        <span class="text-lg font-bold text-slate-800">₹199</span>
+                        <span class="text-xs font-semibold text-slate-500">Subscription Fee</span>
+                        <span class="text-xl font-extrabold text-blue-600">₹199</span>
                     </div>
-                    <div class="text-xs text-slate-600 mb-2">
-                        <strong>UPI ID:</strong> <span class="font-mono bg-white px-2 py-1 border rounded" id="display-upi">nareshkhichar@airtel</span>
-                        <button onclick="copyUpiId()" class="ml-1 text-blue-600 hover:underline"><i class="fa-regular fa-copy"></i> Copy</button>
+                    <div class="text-xs text-slate-700 mb-2">
+                        <strong>UPI ID:</strong> 
+                        <span class="font-mono bg-white px-2 py-1 border rounded text-slate-800 font-semibold" id="display-upi">nareshkhichar@airtel</span>
+                        <button onclick="copyUpiId()" class="ml-1 text-blue-600 hover:underline font-medium"><i class="fa-regular fa-copy"></i> Copy</button>
                     </div>
-                    <p class="text-xs text-slate-500 mt-2">
-                        Kisi bhi UPI App (Google Pay / PhonePe / Paytm / BHIM) se upar di gayi UPI ID par <strong>₹199</strong> transfer karein.
+                    <p class="text-[11px] text-slate-500 mt-2 leading-relaxed">
+                        Kisi bhi UPI app (Google Pay, PhonePe, Paytm, BHIM) se upar di gayi UPI ID par <strong>₹199</strong> transfer karein.
                     </p>
                 </div>
 
-                <div class="text-center">
-                    <p class="text-xs text-slate-500 mb-3">Payment complete hone par admin dwara aapka account verify karke approve kar diya jayega.</p>
-                    <button onclick="checkStatusManual()" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-medium transition">
-                        <i class="fa-solid fa-rotate-right mr-1"></i> Approval Status Check Karein
+                <div class="text-center space-y-2">
+                    <p class="text-xs text-slate-500">Payment receive hone par admin dwara access approve kar diya jayega.</p>
+                    <button onclick="checkStatusManual()" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-medium transition shadow flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Approval Status Check Karein</span>
                     </button>
                 </div>
             </div>
@@ -76,26 +94,38 @@
     </div>
 
     <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
-                    AI
+            <div class="flex items-center space-x-3">
+                <span class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow">
+                    IAF
                 </span>
                 <div>
-                    <h1 class="text-base font-bold text-slate-800 leading-tight">Indian AI Factory</h1>
-                    <p class="text-[11px] text-slate-500 leading-none">Syllabus Tracker</p>
+                    <h1 class="text-base font-bold text-slate-900 leading-tight">Indian AI Factory</h1>
+                    <p class="text-[11px] text-slate-500 leading-none">Smart Syllabus & Study Tracker</p>
                 </div>
             </div>
-            <div class="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full border">
-                <i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Active
+            
+            <div class="flex items-center space-x-2">
+                <!-- PWA Install Prompt Button (fallback for mobile/desktop) -->
+                <button id="pwa-install-header-btn" onclick="triggerPwaInstall()" class="hidden text-xs bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 font-semibold px-2.5 py-1.5 rounded-lg transition items-center gap-1">
+                    <i class="fa-solid fa-download"></i>
+                    <span>App Install</span>
+                </button>
+                <!-- Focus Sound Button -->
+                <button onclick="toggleAmbientSound()" id="ambient-btn" title="Focus Sound" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 flex items-center justify-center text-xs transition">
+                    <i class="fa-solid fa-cloud-rain"></i>
+                </button>
+                <div class="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200 font-medium">
+                    🔥 <span id="streak-counter">0</span> Day
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Navigation Tabs -->
+    <!-- Navigation Tabs -->
     <nav class="bg-white border-b border-slate-200">
-        <div class="max-w-5xl mx-auto px-4 flex space-x-6 text-sm">
+        <div class="max-w-5xl mx-auto px-4 flex space-x-6 text-xs sm:text-sm">
             <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="py-3 active-tab flex items-center gap-1.5">
                 <i class="fa-solid fa-chart-pie"></i> Dashboard
             </button>
@@ -103,78 +133,288 @@
                 <i class="fa-solid fa-book-open"></i> My Syllabus
             </button>
             <button onclick="switchTab('timetable')" id="tab-btn-timetable" class="py-3 text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
-                <i class="fa-solid fa-calendar-days"></i> Time Table
+                <i class="fa-solid fa-calendar-days"></i> Daily Time Table
             </button>
         </div>
     </nav>
 
-    <!-- Content Sections -->
-    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
-        <!-- Tab 1: Dashboard -->
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+
+        <!-- ================= TAB 1: DASHBOARD ================= -->
         <section id="tab-dashboard" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Today's Study</p>
-                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-today-study">0 Topics</h3>
+
+            <!-- Live Progress Overview Report -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-blue-600"></i> Live Progress Report
+                    </h2>
+                    <span id="overall-percentage" class="text-xs font-bold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-200">0% Complete</span>
                 </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Today's Revision</p>
-                    <h3 class="text-2xl font-bold text-blue-600 mt-1" id="stat-today-rev">0 Topics</h3>
+                
+                <div class="w-full bg-slate-100 rounded-full h-2.5 mb-4 overflow-hidden">
+                    <div id="overall-progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
                 </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Overall Progress</p>
-                    <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="stat-progress">0%</h3>
+
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <span class="text-[11px] text-slate-500 font-medium">Total Topics</span>
+                        <h4 id="stat-total-topics" class="text-base sm:text-xl font-bold text-slate-800 mt-0.5">0</h4>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                        <span class="text-[11px] text-emerald-600 font-medium">Completed</span>
+                        <h4 id="stat-completed-topics" class="text-base sm:text-xl font-bold text-emerald-700 mt-0.5">0</h4>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-100">
+                        <span class="text-[11px] text-amber-600 font-medium">Pending</span>
+                        <h4 id="stat-pending-topics" class="text-base sm:text-xl font-bold text-amber-700 mt-0.5">0</h4>
+                    </div>
                 </div>
             </div>
 
-            <!-- Today's Schedule Card -->
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-blue-600"></i> Aaj Ka Study Plan
+            <!-- Focus Pomodoro Timer -->
+            <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-medium">Focus Timer</span>
+                    <h3 class="text-lg font-bold mt-1">25-Minute Pomodoro Study Session</h3>
+                    <p class="text-xs text-blue-100 mt-0.5">Ekagrachitt hokar padhai karein aur alert beep payein.</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-3xl sm:text-4xl font-mono font-extrabold tracking-wider" id="timer-display">25:00</div>
+                    <div class="flex gap-2">
+                        <button onclick="toggleTimer()" id="timer-btn" class="w-10 h-10 bg-white text-blue-700 hover:bg-blue-50 rounded-xl flex items-center justify-center font-bold shadow transition">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="resetTimer()" class="w-10 h-10 bg-white/20 hover:bg-white/30 text-white rounded-xl flex items-center justify-center transition">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Window 1: Aaj Ka Padhne Wala Subject & Topic -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                            <i class="fa-solid fa-book text-blue-600"></i> Aaj Ka Mukhya Adhyayan (Today's Study Plan)
+                        </h3>
+                        <p class="text-xs text-slate-500">Aaj ke nirdharit vishay aur unke important sub-topics</p>
+                    </div>
+                    <span id="study-badge-count" class="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">0 Tasks</span>
+                </div>
+                <div id="today-study-list" class="space-y-2 mt-4"></div>
+            </div>
+
+            <!-- Window 2: Aaj Ka Revise Karne Wala Topic (Revision Window) -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                            <i class="fa-solid fa-rotate text-emerald-600"></i> Aaj Ka Revision Section (Revision Window)
+                        </h3>
+                        <p class="text-xs text-slate-500">1-3-7-21 scientific formula se auto-scheduled revision topics</p>
+                    </div>
+                    <span id="rev-badge-count" class="text-xs font-semibold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">0 Revisions</span>
+                </div>
+                <div id="today-revision-list" class="space-y-2 mt-4"></div>
+            </div>
+
+            <!-- Window 3: Quick Topic Scheduler (Subject -> Subtopic -> Date & Time) -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-900 text-sm sm:text-base mb-1 flex items-center gap-2">
+                    <i class="fa-regular fa-calendar-plus text-indigo-600"></i> Topic Schedule Karein
                 </h3>
-                <div id="today-tasks-container" class="text-xs text-slate-500 italic">
-                    Abhi koi topic schedule nahi hai. 'My Syllabus' se topics add karein.
-                </div>
-            </div>
-        </section>
+                <p class="text-xs text-slate-500 mb-4">Subject chunein, uska structured sub-topic chunein aur date/time set karein:</p>
 
-        <!-- Tab 2: My Syllabus -->
-        <section id="tab-syllabus" class="hidden space-y-6">
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-2 text-sm">Add / Paste Syllabus</h3>
-                <p class="text-xs text-slate-500 mb-3">Apne subjects aur topics yahan paste karein ya enter karein:</p>
-                <textarea id="raw-syllabus-input" rows="5" class="w-full text-xs p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono" placeholder="Subject Name: Topic 1, Topic 2, Topic 3..."></textarea>
-                <div class="mt-3 flex justify-end">
-                    <button onclick="saveSyllabusText()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg shadow-sm">
-                        Syllabus Save Karein
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div>
+                        <label class="font-semibold text-slate-700 block mb-1">1. Subject (Vishay)</label>
+                        <select id="sched-subject-select" onchange="onSubjectChange()" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="">Subject chunein...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700 block mb-1">2. Sub-Topic</label>
+                        <select id="sched-topic-select" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="">Pehle subject chunein...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700 block mb-1">3. Date & Time</label>
+                        <input type="datetime-local" id="sched-datetime" class="w-full p-2 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700 block mb-1">4. Schedule Type</label>
+                        <select id="sched-type" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="study">Mukhya Study</option>
+                            <option value="revision">Revision</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-end">
+                    <button onclick="scheduleTask()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> Schedule Me Jodein
                     </button>
                 </div>
             </div>
 
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-3 text-sm">Saved Syllabus List</h3>
-                <div id="syllabus-list-container" class="text-xs text-slate-500">
-                    Koi syllabus add nahi kiya gaya hai.
-                </div>
-            </div>
         </section>
 
-        <!-- Tab 3: Time Table -->
-        <section id="tab-timetable" class="hidden space-y-6">
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-3 text-sm">Daily Schedule Planner</h3>
-                <p class="text-xs text-slate-500 mb-4">Apna study routine aur slots yahan set karein.</p>
-                <div class="text-xs text-slate-400">Time table generator ready.</div>
+        <!-- ================= TAB 2: MY SYLLABUS ================= -->
+        <section id="tab-syllabus" class="hidden space-y-6">
+
+            <!-- Import / Add Syllabus Card (Word & Text only) -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                            <i class="fa-solid fa-file-import text-blue-600"></i> Syllabus Import & Structure
+                        </h3>
+                        <p class="text-xs text-slate-500">Word file (.docx) upload karein ya direct text paste karke structured sub-topics banayein</p>
+                    </div>
+                    <button onclick="loadSampleSyllabus()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 font-medium transition">
+                        ⚡ Load Demo Syllabus
+                    </button>
+                </div>
+
+                <!-- Word Upload Single Focus Box -->
+                <div class="mb-4">
+                    <label class="border-2 border-dashed border-blue-200 hover:border-blue-400 p-5 rounded-xl cursor-pointer text-center bg-blue-50/40 hover:bg-blue-50 transition block">
+                        <i class="fa-regular fa-file-word text-blue-600 text-3xl mb-1.5"></i>
+                        <span class="block text-xs font-bold text-slate-800">Word Document (.docx) Upload Karein</span>
+                        <span class="block text-[11px] text-slate-500 mt-0.5">App apne-aap Subject aur uske andar ke Sub-topics ko structure kar lega</span>
+                        <input type="file" id="word-upload" accept=".docx" class="hidden" onchange="handleWordUpload(event)">
+                    </label>
+                </div>
+
+                <!-- Structured Text Paste Area -->
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="font-semibold text-slate-700 text-xs">Direct Text Paste Karein (Auto-Structure Support):</label>
+                        <span class="text-[10px] text-slate-400 font-mono">Subject: Subtopic 1, Subtopic 2 ya Dash (-) format</span>
+                    </div>
+                    <textarea id="raw-syllabus-input" rows="6" class="w-full text-xs p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-mono bg-slate-50" placeholder="Udaharan format:
+Rajasthan History:
+- Kalibangan & Ahar Civilization
+- Major Dynasties & Administration
+- 1857 Revolution & Prajamandal
+- Integration of Rajasthan
+
+Rajasthan Geography:
+- Physical Features & Landforms
+- Climate & Drainage System
+- Soil & Vegetation
+
+Indian Polity:
+- Preamble & Fundamental Rights
+- Directive Principles & Duties
+- Governor, Chief Minister & Cabinet"></textarea>
+                    <div class="mt-2 flex justify-end">
+                        <button onclick="parseAndSavePastedText()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-check"></i>
+                            <span>Text Se Structured Syllabus Save Karein</span>
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            <!-- Subject & Sub-topic Structured Directory List -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                        <i class="fa-solid fa-folder-tree text-indigo-600"></i> Aapka Structured Syllabus
+                    </h3>
+                    <button onclick="clearAllSyllabus()" class="text-xs text-red-500 hover:underline">
+                        <i class="fa-regular fa-trash-can mr-1"></i> Pura Syllabus Clear Karein
+                    </button>
+                </div>
+                <div id="syllabus-directory" class="space-y-4"></div>
+            </div>
+
         </section>
+
+        <!-- ================= TAB 3: DAILY TIME TABLE GENERATOR ================= -->
+        <section id="tab-timetable" class="hidden space-y-6">
+
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-900 text-sm sm:text-base mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-blue-600"></i> Smart Daily Time Table Generator
+                </h3>
+                <p class="text-xs text-slate-500 mb-4">Duration aur buffer frequency chun kar structured timetable generate karein:</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div>
+                        <label class="font-semibold text-slate-700 block mb-1">Start Date</label>
+                        <input type="date" id="tt-start-date" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700 block mb-1">Plan Duration</label>
+                        <select id="tt-duration" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="7">7 Days Crash Plan</option>
+                            <option value="15">15 Days Plan</option>
+                            <option value="30" selected>30 Days Master Plan</option>
+                            <option value="45">45 Days Plan</option>
+                            <option value="60">60 Days Plan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700 block mb-1">Session Duration</label>
+                        <select id="tt-session-time" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="45">45 Minutes</option>
+                            <option value="60" selected>60 Minutes</option>
+                            <option value="90">90 Minutes</option>
+                            <option value="120">120 Minutes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700 block mb-1">Buffer / Alternate Days</label>
+                        <select id="tt-frequency" class="w-full p-2.5 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="1">Daily (Rozana)</option>
+                            <option value="2">Alternate Days (1 Din Chhod Kar)</option>
+                            <option value="3">Every 3rd Day (Har 2 Din Baad)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-end gap-2">
+                    <button onclick="generateTimeTablePreview()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt"></i> Time Table Preview Banayein
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preview Window -->
+            <div id="tt-preview-card" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="fa-regular fa-calendar-check text-emerald-600"></i> Time Table Preview
+                        </h4>
+                        <p class="text-xs text-slate-500">Niche tay timetable dekhein aur main dashboard schedule me apply karein:</p>
+                    </div>
+                    <button onclick="applyGeneratedSchedule()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-check-double"></i> Main Schedule Me Apply Karein
+                    </button>
+                </div>
+                <div id="tt-preview-content" class="space-y-3 max-h-96 overflow-y-auto pr-1"></div>
+            </div>
+
+        </section>
+
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
         Managed & Powered by <strong class="text-slate-700">Indian AI Factory</strong>
     </footer>
 
-    <!-- App Script -->
+    <!-- Audio Beep for Reminder & Timer -->
+    <audio id="beep-audio" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+
+    <!-- JavaScript Logic -->
     <script>
         const APP_CONFIG = {
             brandName: "Indian AI Factory",
@@ -182,6 +422,80 @@
             upiId: "nareshkhichar@airtel"
         };
 
+        // State Store
+        let syllabusData = {};
+        let scheduledTasks = [];
+        let timerSeconds = 25 * 60;
+        let timerInterval = null;
+        let isTimerRunning = false;
+        let generatedPlan = [];
+        let ambientAudio = null;
+        let deferredPrompt = null;
+
+        // --- PWA Setup for URL Bar Install Icon ---
+        function setupPwaManifest() {
+            const manifestObj = {
+                "name": "Indian AI Factory - Syllabus Tracker",
+                "short_name": "IAF Tracker",
+                "description": "Smart Syllabus & Study Tracker by Indian AI Factory",
+                "start_url": "./index.html",
+                "display": "standalone",
+                "background_color": "#f8fafc",
+                "theme_color": "#2563eb",
+                "icons": [
+                    {
+                        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%232563eb'/><text x='96' y='125' font-size='90' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>AI</text></svg>",
+                        "sizes": "192x192",
+                        "type": "image/svg+xml",
+                        "purpose": "any maskable"
+                    },
+                    {
+                        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%232563eb'/><text x='256' y='330' font-size='240' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>AI</text></svg>",
+                        "sizes": "512x512",
+                        "type": "image/svg+xml",
+                        "purpose": "any maskable"
+                    }
+                ]
+            };
+            const stringManifest = JSON.stringify(manifestObj);
+            const blob = new Blob([stringManifest], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blob);
+            document.querySelector('#manifest-placeholder').setAttribute('href', manifestURL);
+
+            // Register dummy service worker for PWA install eligibility in Chrome
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('install', e => self.skipWaiting());
+                    self.addEventListener('activate', e => self.clients.claim());
+                    self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+                `;
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                const swUrl = URL.createObjectURL(swBlob);
+                navigator.serviceWorker.register(swUrl).catch(() => {});
+            }
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('pwa-install-header-btn');
+            if (btn) btn.classList.remove('hidden');
+        });
+
+        function triggerPwaInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => {
+                    deferredPrompt = null;
+                    const btn = document.getElementById('pwa-install-header-btn');
+                    if (btn) btn.classList.add('hidden');
+                });
+            } else {
+                alert("Browser ke upar address bar (URL) ke right corner me Install icon ya Chrome menu (⋮) -> 'Install App / Add to Home screen' par click karein.");
+            }
+        }
+
+        // --- Tab Switching ---
         function switchTab(tabId) {
             ['dashboard', 'syllabus', 'timetable'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
@@ -191,6 +505,7 @@
             document.getElementById(`tab-btn-${tabId}`).className = 'py-3 active-tab flex items-center gap-1.5';
         }
 
+        // --- Approval & Lock System ---
         function getDeviceId() {
             let id = localStorage.getItem('iaf_device_id');
             if (!id) {
@@ -256,26 +571,502 @@
             if (myReq && myReq.status === 'approved') {
                 localStorage.setItem('iaf_user_approved', 'true');
                 document.getElementById('device-lock-screen').classList.add('hidden');
-                alert('Aapka subscription activate ho gaya hai!');
+                alert('Badhai ho! Aapka access approve aur activate ho gaya hai.');
             } else {
-                alert('Abhi tak approve nahi hua hai. Kripya thoda intezar karein ya admin se sampark karein.');
+                alert('Abhi approval pending hai. Kripya thoda wait karein ya admin se contact karein.');
             }
         }
 
-        function saveSyllabusText() {
-            const txt = document.getElementById('raw-syllabus-input').value.trim();
-            if (!txt) return;
-            localStorage.setItem('iaf_saved_syllabus', txt);
-            document.getElementById('syllabus-list-container').innerText = txt;
-            alert('Syllabus successfully save ho gaya!');
+        // --- Structured Syllabus Parsing (Hierarchical Sub-topics) ---
+        function parseSyllabusText(rawText) {
+            const lines = rawText.split('\n');
+            let currentSubject = "General Studies";
+
+            lines.forEach(line => {
+                let clean = line.trim();
+                if (!clean) return;
+
+                // Identify Subject Header: ends with colon OR starts with # OR short line without bullet
+                if (clean.endsWith(':') || clean.startsWith('#') || (!clean.startsWith('-') && !clean.startsWith('*') && !clean.startsWith('•') && clean.length < 40 && !/^\d+[\.\)]/.test(clean))) {
+                    currentSubject = clean.replace(/^#+\s*/, '').replace(/[:\-]/g, '').trim();
+                    if (!syllabusData[currentSubject]) {
+                        syllabusData[currentSubject] = [];
+                    }
+                } else {
+                    // Check if multiple sub-topics are comma separated
+                    let topicLine = clean.replace(/^[\-*•\d.]+\s*/, '').trim();
+                    if (topicLine.includes(',') && !topicLine.includes('(')) {
+                        const parts = topicLine.split(',');
+                        parts.forEach(p => {
+                            const subName = p.trim();
+                            addSubTopic(currentSubject, subName);
+                        });
+                    } else {
+                        addSubTopic(currentSubject, topicLine);
+                    }
+                }
+            });
+
+            saveSyllabus();
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            checkDeviceApproval();
-            const saved = localStorage.getItem('iaf_saved_syllabus');
+        function addSubTopic(subject, topicName) {
+            if (!topicName || topicName.length < 2) return;
+            if (!syllabusData[subject]) syllabusData[subject] = [];
+            if (!syllabusData[subject].some(t => t.name.toLowerCase() === topicName.toLowerCase())) {
+                syllabusData[subject].push({
+                    name: topicName,
+                    completed: false,
+                    difficulty: 'medium'
+                });
+            }
+        }
+
+        function parseAndSavePastedText() {
+            const text = document.getElementById('raw-syllabus-input').value.trim();
+            if (!text) {
+                alert('Kripya syllabus text paste karein.');
+                return;
+            }
+            parseSyllabusText(text);
+            document.getElementById('raw-syllabus-input').value = '';
+            alert('Syllabus successfully structure aur save ho gaya!');
+        }
+
+        function handleWordUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                mammoth.extractRawText({ arrayBuffer: event.target.result })
+                    .then(result => {
+                        parseSyllabusText(result.value);
+                        alert(`Word document '${file.name}' se syllabus aur sub-topics successfully structure ho gaye!`);
+                    })
+                    .catch(err => alert('Word file read karne me error: ' + err.message));
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function loadSampleSyllabus() {
+            syllabusData = {
+                "Rajasthan History": [
+                    { name: "Kalibangan & Ahar Civilization", completed: true, difficulty: "easy" },
+                    { name: "Major Rajput Dynasties & Governance", completed: false, difficulty: "medium" },
+                    { name: "1857 Revolution & Peasant Movements", completed: false, difficulty: "hard" },
+                    { name: "Integration of Rajasthan", completed: false, difficulty: "easy" }
+                ],
+                "Rajasthan Geography": [
+                    { name: "Physical Divisions & Landforms", completed: false, difficulty: "medium" },
+                    { name: "Climate, Rivers & Lakes", completed: false, difficulty: "hard" },
+                    { name: "Forests, Wildlife & Minerals", completed: false, difficulty: "easy" }
+                ],
+                "Indian Polity & Governance": [
+                    { name: "Preamble & Fundamental Rights", completed: true, difficulty: "medium" },
+                    { name: "Directive Principles & Duties", completed: false, difficulty: "easy" },
+                    { name: "Governor, Chief Minister & State Legislature", completed: false, difficulty: "medium" }
+                ]
+            };
+            saveSyllabus();
+            alert('Demo structured syllabus successfully load ho gaya!');
+        }
+
+        function saveSyllabus() {
+            localStorage.setItem('iaf_syllabus_data', JSON.stringify(syllabusData));
+            populateSubjectDropdown();
+            renderSyllabusDirectory();
+            updateProgressStats();
+        }
+
+        function loadSyllabusFromStorage() {
+            const data = localStorage.getItem('iaf_syllabus_data');
+            if (data) {
+                try { syllabusData = JSON.parse(data); } catch(e) { syllabusData = {}; }
+            }
+            populateSubjectDropdown();
+            renderSyllabusDirectory();
+            updateProgressStats();
+        }
+
+        function clearAllSyllabus() {
+            if (confirm('Kya aap sach me pura syllabus hatana chahte hain?')) {
+                syllabusData = {};
+                saveSyllabus();
+            }
+        }
+
+        // --- Render Structured Directory (Hierarchical Sub-topics) ---
+        function renderSyllabusDirectory() {
+            const container = document.getElementById('syllabus-directory');
+            container.innerHTML = '';
+            const subjects = Object.keys(syllabusData);
+
+            if (subjects.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic">Abhi koi syllabus saved nahi hai. Word file ya text se add karein.</p>`;
+                return;
+            }
+
+            subjects.forEach(sub => {
+                const topics = syllabusData[sub];
+                const doneCount = topics.filter(t => t.completed).length;
+                const pct = topics.length ? Math.round((doneCount / topics.length) * 100) : 0;
+
+                const card = document.createElement('div');
+                card.className = "border border-slate-200 rounded-xl p-4 bg-slate-50/70";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-bold text-xs sm:text-sm text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-folder text-blue-500"></i> ${sub}
+                        </span>
+                        <span class="text-xs font-semibold text-blue-600">${pct}% Done (${doneCount}/${topics.length})</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-1.5 mb-3">
+                        <div class="bg-blue-600 h-1.5 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                    </div>
+                    <div class="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+                        ${topics.map((t, idx) => `
+                            <div class="flex items-center justify-between text-xs bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-2xs">
+                                <span class="flex items-center gap-2 ${t.completed ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">
+                                    <span class="text-[10px] text-slate-400 font-mono">${idx + 1}.</span>
+                                    <span>${t.name}</span>
+                                </span>
+                                <span class="text-[10px] uppercase font-semibold px-2 py-0.5 rounded ${t.difficulty === 'hard' ? 'bg-red-100 text-red-600' : t.difficulty === 'easy' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}">${t.difficulty}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- Dropdowns ---
+        function populateSubjectDropdown() {
+            const subSelect = document.getElementById('sched-subject-select');
+            subSelect.innerHTML = '<option value="">Subject chunein...</option>';
+            Object.keys(syllabusData).forEach(subj => {
+                const opt = document.createElement('option');
+                opt.value = subj;
+                opt.textContent = subj;
+                subSelect.appendChild(opt);
+            });
+            onSubjectChange();
+        }
+
+        function onSubjectChange() {
+            const subj = document.getElementById('sched-subject-select').value;
+            const topSelect = document.getElementById('sched-topic-select');
+            topSelect.innerHTML = '';
+
+            if (!subj || !syllabusData[subj] || syllabusData[subj].length === 0) {
+                topSelect.innerHTML = '<option value="">Koi sub-topic uplabdh nahi</option>';
+                return;
+            }
+
+            syllabusData[subj].forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.name;
+                opt.textContent = (t.completed ? '✓ ' : '') + t.name;
+                topSelect.appendChild(opt);
+            });
+        }
+
+        // --- Task Scheduling ---
+        function scheduleTask() {
+            const subject = document.getElementById('sched-subject-select').value;
+            const topic = document.getElementById('sched-topic-select').value;
+            const datetime = document.getElementById('sched-datetime').value;
+            const type = document.getElementById('sched-type').value;
+
+            if (!subject || !topic) {
+                alert('Kripya subject aur sub-topic dono chunein.');
+                return;
+            }
+
+            const task = {
+                id: 'TSK-' + Date.now(),
+                subject,
+                topic,
+                datetime: datetime || new Date().toISOString(),
+                type,
+                completed: false
+            };
+
+            scheduledTasks.push(task);
+            saveScheduledTasks();
+            alert(`'${topic}' ko schedule me add kar diya gaya!`);
+        }
+
+        function saveScheduledTasks() {
+            localStorage.setItem('iaf_scheduled_tasks', JSON.stringify(scheduledTasks));
+            renderScheduledWindows();
+            updateProgressStats();
+        }
+
+        function loadScheduledTasks() {
+            const saved = localStorage.getItem('iaf_scheduled_tasks');
             if (saved) {
-                document.getElementById('syllabus-list-container').innerText = saved;
+                try { scheduledTasks = JSON.parse(saved); } catch(e) { scheduledTasks = []; }
             }
+            renderScheduledWindows();
+        }
+
+        function renderScheduledWindows() {
+            const studyContainer = document.getElementById('today-study-list');
+            const revContainer = document.getElementById('today-revision-list');
+
+            studyContainer.innerHTML = '';
+            revContainer.innerHTML = '';
+
+            const todayStudy = scheduledTasks.filter(t => t.type === 'study');
+            const todayRev = scheduledTasks.filter(t => t.type === 'revision');
+
+            document.getElementById('study-badge-count').innerText = `${todayStudy.length} Tasks`;
+            document.getElementById('rev-badge-count').innerText = `${todayRev.length} Revisions`;
+
+            if (todayStudy.length === 0) {
+                studyContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Aaj koi mukhya study schedule nahi hai. Niche se schedule karein.</p>`;
+            } else {
+                todayStudy.forEach(t => studyContainer.appendChild(createTaskCard(t)));
+            }
+
+            if (todayRev.length === 0) {
+                revContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Aaj revision ke liye koi topic pending nahi hai.</p>`;
+            } else {
+                todayRev.forEach(t => revContainer.appendChild(createTaskCard(t)));
+            }
+        }
+
+        function createTaskCard(t) {
+            const div = document.createElement('div');
+            div.className = `flex items-center justify-between p-3 rounded-xl border transition ${t.completed ? 'bg-emerald-50/60 border-emerald-200' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`;
+            
+            const timeFormatted = t.datetime ? new Date(t.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" onchange="toggleComplete('${t.id}')" ${t.completed ? 'checked' : ''} class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
+                    <div>
+                        <div class="text-xs font-bold ${t.completed ? 'line-through text-slate-400' : 'text-slate-800'}">${t.topic}</div>
+                        <div class="text-[11px] text-slate-500 flex items-center gap-2">
+                            <span><i class="fa-solid fa-book-bookmark text-blue-500"></i> ${t.subject}</span>
+                            ${timeFormatted ? `<span><i class="fa-regular fa-clock text-slate-400"></i> ${timeFormatted}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <button onclick="deleteTask('${t.id}')" class="text-slate-400 hover:text-red-500 text-xs px-2 py-1">
+                    <i class="fa-regular fa-trash-can"></i>
+                </button>
+            `;
+            return div;
+        }
+
+        function toggleComplete(id) {
+            const task = scheduledTasks.find(t => t.id === id);
+            if (!task) return;
+
+            task.completed = !task.completed;
+
+            if (syllabusData[task.subject]) {
+                const subTopic = syllabusData[task.subject].find(t => t.name === task.topic);
+                if (subTopic) subTopic.completed = task.completed;
+            }
+
+            // 1-3-7-21 SRS Scheduling on Complete
+            if (task.completed && task.type === 'study') {
+                if (confirm(`'${task.topic}' complete hua! Kya aap ise 1-3-7-21 scientific revision me auto-schedule karna chahte hain?`)) {
+                    [1, 3, 7, 21].forEach(days => {
+                        const futureDate = new Date();
+                        futureDate.setDate(futureDate.getDate() + days);
+                        scheduledTasks.push({
+                            id: 'REV-' + Date.now() + '-' + days,
+                            subject: task.subject,
+                            topic: `${task.topic} (${days} Day Revision)`,
+                            datetime: futureDate.toISOString(),
+                            type: 'revision',
+                            completed: false
+                        });
+                    });
+                }
+            }
+
+            saveSyllabus();
+            saveScheduledTasks();
+        }
+
+        function deleteTask(id) {
+            scheduledTasks = scheduledTasks.filter(t => t.id !== id);
+            saveScheduledTasks();
+        }
+
+        function updateProgressStats() {
+            let total = 0;
+            let done = 0;
+
+            Object.values(syllabusData).forEach(topics => {
+                topics.forEach(t => {
+                    total++;
+                    if (t.completed) done++;
+                });
+            });
+
+            const pct = total ? Math.round((done / total) * 100) : 0;
+            document.getElementById('stat-total-topics').innerText = total;
+            document.getElementById('stat-completed-topics').innerText = done;
+            document.getElementById('stat-pending-topics').innerText = total - done;
+            document.getElementById('overall-progress-bar').style.width = pct + '%';
+            document.getElementById('overall-percentage').innerText = pct + '% Complete';
+        }
+
+        // --- Time Table Generator ---
+        function generateTimeTablePreview() {
+            const startDateVal = document.getElementById('tt-start-date').value;
+            const duration = parseInt(document.getElementById('tt-duration').value);
+            const frequency = parseInt(document.getElementById('tt-frequency').value);
+            const sessionMins = document.getElementById('tt-session-time').value;
+
+            const allTopics = [];
+            Object.keys(syllabusData).forEach(sub => {
+                syllabusData[sub].forEach(t => {
+                    if (!t.completed) allTopics.push({ subject: sub, topic: t.name });
+                });
+            });
+
+            if (allTopics.length === 0) {
+                alert('Syllabus me koi pending sub-topic nahi mila! Pehle syllabus add karein.');
+                return;
+            }
+
+            const startDate = startDateVal ? new Date(startDateVal) : new Date();
+            generatedPlan = [];
+            let topicIndex = 0;
+
+            for (let day = 0; day < duration; day += frequency) {
+                if (topicIndex >= allTopics.length) break;
+
+                const planDate = new Date(startDate);
+                planDate.setDate(planDate.getDate() + day);
+
+                const item = allTopics[topicIndex];
+                generatedPlan.push({
+                    date: planDate.toISOString().split('T')[0],
+                    displayDate: planDate.toLocaleDateString('hi-IN', { weekday: 'short', month: 'short', day: 'numeric' }),
+                    subject: item.subject,
+                    topic: item.topic,
+                    duration: sessionMins
+                });
+                topicIndex++;
+            }
+
+            const previewCard = document.getElementById('tt-preview-card');
+            const previewContent = document.getElementById('tt-preview-content');
+            previewContent.innerHTML = '';
+
+            generatedPlan.forEach(p => {
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs";
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">${p.displayDate}</span>
+                        <div>
+                            <span class="font-bold text-slate-800">${p.topic}</span>
+                            <div class="text-[11px] text-slate-500">${p.subject} • ${p.duration} Min Session</div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-medium">Scheduled</span>
+                `;
+                previewContent.appendChild(row);
+            });
+
+            previewCard.classList.remove('hidden');
+        }
+
+        function applyGeneratedSchedule() {
+            if (generatedPlan.length === 0) return;
+
+            generatedPlan.forEach(p => {
+                scheduledTasks.push({
+                    id: 'TT-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+                    subject: p.subject,
+                    topic: p.topic,
+                    datetime: p.date + 'T09:00',
+                    type: 'study',
+                    completed: false
+                });
+            });
+
+            saveScheduledTasks();
+            alert('Time table aapke main dashboard study schedule me successfully apply ho gaya!');
+            switchTab('dashboard');
+        }
+
+        // --- Pomodoro Timer ---
+        function toggleTimer() {
+            const btn = document.getElementById('timer-btn');
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            } else {
+                isTimerRunning = true;
+                btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                        document.getElementById('beep-audio').play().catch(()=>{});
+                        alert('Pomodoro session complete hua! 5 minute ka break lein.');
+                        resetTimer();
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerSeconds = 25 * 60;
+            updateTimerDisplay();
+            document.getElementById('timer-btn').innerHTML = '<i class="fa-solid fa-play"></i>';
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            document.getElementById('timer-display').innerText = 
+                `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // --- Ambient Sound ---
+        function toggleAmbientSound() {
+            const btn = document.getElementById('ambient-btn');
+            if (!ambientAudio) {
+                ambientAudio = new Audio('https://actions.google.com/sounds/v1/weather/rain_heavy.ogg');
+                ambientAudio.loop = true;
+            }
+
+            if (ambientAudio.paused) {
+                ambientAudio.play().then(() => {
+                    btn.classList.add('bg-blue-600', 'text-white');
+                    btn.classList.remove('text-slate-600');
+                }).catch(() => {});
+            } else {
+                ambientAudio.pause();
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('text-slate-600');
+            }
+        }
+
+        // Init
+        window.addEventListener('DOMContentLoaded', () => {
+            setupPwaManifest();
+            document.getElementById('tt-start-date').value = new Date().toISOString().split('T')[0];
+            checkDeviceApproval();
+            loadSyllabusFromStorage();
+            loadScheduledTasks();
         });
     </script>
 </body>

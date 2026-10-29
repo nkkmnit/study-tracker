@@ -1,2077 +1,282 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Syllabus Tracker & Smart Study Planner</title>
-  <!-- PWA Manifest Inline Data URL -->
-  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiU3lsbGFidXMgVHJhY2tlciIsInNob3J0X25hbWUiOiJTdHVkeVRyYWNrZXIiLCJzdGFydF91cmwiOiIuLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmOGZhZmMiLCJ0aGVtZV9jb2xvciI6IiM0ZjQ2ZTUiLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMzQxMy8zNDEzNTM4LnBuZyIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9wbmcifV19">
-  <meta name="theme-color" content="#4f46e5">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Phosphor Icons -->
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <!-- Mammoth.js for Word (.docx) file extraction -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-  <!-- PDF.js for PDF text extraction -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <!-- Canvas Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
-    body {
-      font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .custom-scroll::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 9999px;
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(12px);
-    }
-    .tab-btn.active {
-      color: #4f46e5;
-      background-color: #eef2ff;
-      border-color: #c7d2fe;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian AI Factory - Syllabus Tracker</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .active-tab {
+            border-bottom: 3px solid #2563eb;
+            color: #2563eb;
+            font-weight: 600;
+        }
+    </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white pb-24">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
 
-  <!-- ========================================== -->
-  <!-- 1. FULLSCREEN DEVICE LOCK / ACTIVATION SCREEN -->
-  <!-- ========================================== -->
-  <div id="device-lock-screen" class="fixed inset-0 z-50 bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-800 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 text-center">
-      <div class="w-16 h-16 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto text-3xl shadow-lg">
-        <i class="ph-bold ph-shield-check"></i>
-      </div>
+    <!-- Approval Lock Screen Overlay -->
+    <div id="device-lock-screen" class="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center border border-slate-200">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-1">Indian AI Factory</h2>
+            <p class="text-sm text-slate-500 mb-6">Smart Syllabus & Study Tracker</p>
 
-      <div>
-        <h2 class="text-xl font-extrabold text-white">सत्यापन आवश्यक (Access Restricted)</h2>
-        <p class="text-xs text-slate-400 mt-1">इस ऐप का उपयोग करने के लिए एडमिन से अप्रूवल आवश्यक है।</p>
-      </div>
+            <!-- Registration Step -->
+            <div id="step-register">
+                <p class="text-sm text-slate-600 mb-4 text-left">App access pane ke liye niche apna naam aur mobile number darj karein:</p>
+                <div class="space-y-3 mb-4 text-left">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600">Aapka Naam</label>
+                        <input type="text" id="user-name" placeholder="Apna naam likhein" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600">Mobile Number</label>
+                        <input type="tel" id="user-phone" placeholder="10-digit mobile number" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+                <button onclick="submitApprovalRequest()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition shadow-md">
+                    Access Request Bhejein
+                </button>
+            </div>
 
-      <!-- Pending Approval State Display -->
-      <div id="lock-pending-badge" class="hidden p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-300 text-xs text-left flex items-start gap-2.5">
-        <i class="ph-bold ph-hourglass-high text-xl flex-shrink-0 animate-spin"></i>
-        <div>
-          <span class="font-bold block">आपकी अनुमति लंबित है (Pending Approval)</span>
-          <p class="text-[11px] text-amber-200/80 mt-0.5">एडमिन द्वारा अप्रूव करते ही यह ऐप स्वतः खुल जाएगा। कृपया प्रतीक्षा करें।</p>
+            <!-- Payment / Approval Waiting Step -->
+            <div id="step-payment" class="hidden text-left">
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg mb-4 text-xs text-amber-800">
+                    <i class="fa-solid fa-clock mr-1"></i> Aapki request bhej di gayi hai. Access activate karne ke liye subscription complete karein.
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-medium text-slate-500">Subscription Fee</span>
+                        <span class="text-lg font-bold text-slate-800">₹199</span>
+                    </div>
+                    <div class="text-xs text-slate-600 mb-2">
+                        <strong>UPI ID:</strong> <span class="font-mono bg-white px-2 py-1 border rounded" id="display-upi">nareshkhichar@airtel</span>
+                        <button onclick="copyUpiId()" class="ml-1 text-blue-600 hover:underline"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">
+                        Kisi bhi UPI App (Google Pay / PhonePe / Paytm / BHIM) se upar di gayi UPI ID par <strong>₹199</strong> transfer karein.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <p class="text-xs text-slate-500 mb-3">Payment complete hone par admin dwara aapka account verify karke approve kar diya jayega.</p>
+                    <button onclick="checkStatusManual()" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-medium transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Approval Status Check Karein
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-
-      <!-- Rejected/Blocked State Display -->
-      <div id="lock-rejected-badge" class="hidden p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-rose-300 text-xs text-left flex items-start gap-2.5">
-        <i class="ph-bold ph-prohibit text-xl flex-shrink-0"></i>
-        <div>
-          <span class="font-bold block">पहुँच अस्वीकृत (Access Denied)</span>
-          <p class="text-[11px] text-rose-200/80 mt-0.5">एडमिन ने इस डिवाइस को ब्लॉक या अस्वीकृत कर दिया है।</p>
-        </div>
-      </div>
-
-      <!-- Device Request ID Display -->
-      <div class="bg-slate-900/80 border border-slate-700 rounded-2xl p-4 text-left">
-        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">आपका डिवाइस अनुरोध कोड (Device ID)</span>
-        <div class="flex items-center justify-between mt-1">
-          <span id="user-request-code" class="font-mono text-base font-bold text-indigo-300 tracking-wider">REQ-0000-0000</span>
-          <button id="copy-req-code-btn" class="px-3 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
-            <i class="ph ph-copy"></i> <span>कॉपी</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Request Form -->
-      <div class="space-y-3 text-left" id="approval-request-box">
-        <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">आपका नाम (Your Name)</label>
-          <input type="text" id="user-name-input" placeholder="अपना पूरा नाम दर्ज करें" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">मोबाइल नंबर (Mobile No.)</label>
-          <input type="tel" id="user-phone-input" placeholder="उदा: 9876543210" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-mono text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        </div>
-        <button id="submit-request-btn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
-          <i class="ph-bold ph-paper-plane-tilt"></i> एडमिन को अनुमति भेजें (Request Access)
-        </button>
-      </div>
-
-      <div class="pt-2 text-center text-[11px] text-slate-500">
-        सुरक्षित प्रोग्रेसिव वेब एप्लिकेशन (Syllabus Tracker)
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- 2. APP HEADER -->
-  <!-- ========================================== -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
-    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2.5">
-        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200">
-          <i class="ph-bold ph-graduation-cap text-2xl"></i>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-lg font-bold text-slate-900 leading-tight" data-i18n="app_title">Syllabus Tracker</h1>
-            <!-- Streak Badge -->
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-600 border border-amber-200 shadow-xs" title="Study Streak">
-              🔥 <span id="streak-counter-badge">1 दिन</span>
-            </span>
-          </div>
-          <p class="text-xs text-slate-500 font-medium" id="current-live-time">लोड हो रहा है...</p>
-        </div>
-      </div>
-
-      <!-- Header Action Controls -->
-      <div class="flex items-center gap-2">
-        <!-- Install PWA Button -->
-        <button id="pwa-install-btn" class="hidden items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 transition shadow-sm animate-pulse">
-          <i class="ph ph-download-simple text-sm"></i>
-          <span data-i18n="install_app">ऐप डाउनलोड</span>
-        </button>
-
-        <!-- Ambient Noise Sound Toggle -->
-        <button id="ambient-sound-btn" class="p-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-600 transition" title="एकाग्रता ध्वनि (Rain Sounds)">
-          <i class="ph-fill ph-drop" id="ambient-icon"></i>
-        </button>
-
-        <!-- Language Toggle -->
-        <button id="lang-toggle-btn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold text-indigo-700 transition">
-          <i class="ph ph-translate text-sm"></i>
-          <span id="lang-label">English</span>
-        </button>
-      </div>
     </div>
 
-    <!-- Sub Navigation Tabs -->
-    <div class="border-t border-slate-100 bg-slate-50/70">
-      <div class="max-w-4xl mx-auto px-4 flex items-center gap-2 py-1.5">
-        <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="tab-btn active px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 border border-transparent">
-          <i class="ph-bold ph-squares-four text-base"></i> <span data-i18n="tab_dashboard">डैशबोर्ड</span>
-        </button>
-        <button onclick="switchTab('syllabus')" id="nav-btn-syllabus" class="tab-btn px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200/60 transition flex items-center gap-2 border border-transparent">
-          <i class="ph-bold ph-books text-base"></i> <span data-i18n="tab_syllabus">माय सिलेबस</span>
-        </button>
-        <button onclick="switchTab('timetable')" id="nav-btn-timetable" class="tab-btn px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200/60 transition flex items-center gap-2 border border-transparent">
-          <i class="ph-bold ph-calendar-check text-base"></i> <span data-i18n="tab_timetable">डेली टाइम टेबल</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- ========================================== -->
-  <!-- 3. MAIN DASHBOARD CONTENT AREA -->
-  <!-- ========================================== -->
-  <main class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6">
-
-    <!-- ========================================== -->
-    <!-- TAB 1: MAIN DASHBOARD VIEW -->
-    <!-- ========================================== -->
-    <div id="tab-pane-dashboard" class="space-y-6">
-
-      <!-- Overall Syllabus Progress Report Card -->
-      <section class="bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
-        <div class="relative z-10 space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold bg-white/10 text-indigo-200 border border-white/10 mb-1.5">
-                <i class="ph-fill ph-chart-polar"></i> <span data-i18n="overall_report_badge">लाइव प्रोग्रेस रिपोर्ट</span>
-              </span>
-              <h3 class="text-xl font-black text-white" data-i18n="overall_report_title">सिलेबस तैयारी स्थिति</h3>
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                    AI
+                </span>
+                <div>
+                    <h1 class="text-base font-bold text-slate-800 leading-tight">Indian AI Factory</h1>
+                    <p class="text-[11px] text-slate-500 leading-none">Syllabus Tracker</p>
+                </div>
             </div>
-            <div class="text-right flex items-center gap-3">
-              <div>
-                <span class="text-3xl font-black text-emerald-400 font-mono" id="stat-overall-percentage">0%</span>
-                <span class="text-xs text-indigo-200 block" data-i18n="overall_done">पूरा हुआ (Completed)</span>
-              </div>
+            <div class="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full border">
+                <i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Active
             </div>
-          </div>
-
-          <!-- Overall Progress Bar -->
-          <div class="w-full bg-slate-950/60 h-3.5 rounded-full p-0.5 border border-white/10">
-            <div id="stat-progress-bar-fill" class="bg-gradient-to-r from-indigo-500 via-emerald-400 to-teal-300 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
-          </div>
-
-          <!-- Quick Metrics Grid -->
-          <div class="grid grid-cols-3 gap-3 pt-1">
-            <div class="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
-              <span class="text-xs text-indigo-200 block" data-i18n="stat_total_topics">कुल टॉपिक्स</span>
-              <span class="text-lg font-bold font-mono text-white mt-0.5 block" id="stat-total-topics">0</span>
-            </div>
-            <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3 text-center">
-              <span class="text-xs text-emerald-200 block" data-i18n="stat_completed_topics">पूरे किए गए</span>
-              <span class="text-lg font-bold font-mono text-emerald-300 mt-0.5 block" id="stat-completed-topics">0</span>
-            </div>
-            <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 text-center">
-              <span class="text-xs text-amber-200 block" data-i18n="stat_remaining_topics">शेष बाकी</span>
-              <span class="text-lg font-bold font-mono text-amber-300 mt-0.5 block" id="stat-remaining-topics">0</span>
-            </div>
-          </div>
         </div>
-      </section>
+    </header>
 
-      <!-- MAIN WINDOW: Today's Study Window -->
-      <section class="glass-card rounded-2xl border border-indigo-100 shadow-md overflow-hidden transition-all hover:shadow-lg">
-        <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 p-4 sm:px-6 text-white flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-xl">
-              <i class="ph-fill ph-book-open"></i>
-            </div>
-            <div>
-              <h2 class="font-bold text-base sm:text-lg" data-i18n="main_study_window">आज का मुख्य अध्ययन (Today's Study Plan)</h2>
-              <p class="text-xs text-indigo-100" id="study-date-display"></p>
-            </div>
-          </div>
-          <span id="study-count-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white/20 text-white border border-white/30">0 टॉपिक</span>
-        </div>
-
-        <div class="p-4 sm:p-6 divide-y divide-slate-100 min-h-[140px] flex flex-col justify-center" id="study-task-list">
-          <!-- Dynamic items -->
-        </div>
-      </section>
-
-      <!-- REVISION WINDOW: Today's Revision Window -->
-      <section class="glass-card rounded-2xl border border-amber-200 shadow-md overflow-hidden transition-all hover:shadow-lg">
-        <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-4 sm:px-6 text-white flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-xl">
-              <i class="ph-fill ph-repeat"></i>
-            </div>
-            <div>
-              <h2 class="font-bold text-base sm:text-lg" data-i18n="revision_study_window">आज का रिवीज़न (Today's Revision)</h2>
-              <p class="text-xs text-amber-100" data-i18n="revision_subtitle">वैज्ञानिक 1-3-7-21 दिवस विधि व पुराने टॉपिक</p>
-            </div>
-          </div>
-          <span id="revision-count-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white/20 text-white border border-white/30">0 टॉपिक</span>
-        </div>
-
-        <div class="p-4 sm:p-6 divide-y divide-slate-100 min-h-[120px] flex flex-col justify-center" id="revision-task-list">
-          <!-- Dynamic items -->
-        </div>
-      </section>
-
-      <!-- STUDY SCHEDULER & TOPIC PICKER -->
-      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6">
-        <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
-          <div class="p-2 rounded-lg bg-emerald-50 text-emerald-600">
-            <i class="ph-bold ph-calendar-plus text-xl"></i>
-          </div>
-          <div>
-            <h3 class="font-bold text-slate-900" data-i18n="schedule_title">नया अध्ययन / रिवीज़न शेड्यूल करें</h3>
-            <p class="text-xs text-slate-500" data-i18n="schedule_desc">विषय चुनें, सब-टॉपिक चुनें, फिर तारीख और समय सेट करें</p>
-          </div>
-        </div>
-
-        <form id="schedule-form" class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <!-- Subject Select -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" data-i18n="lbl_subject">1. विषय चुनें (Select Subject)</label>
-              <div class="relative">
-                <select id="select-subject" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition appearance-none">
-                  <option value="" disabled selected data-i18n="choose_subject">-- विषय चुनें --</option>
-                </select>
-                <i class="ph ph-caret-down absolute right-3.5 top-3.5 text-slate-400 pointer-events-none"></i>
-              </div>
-            </div>
-
-            <!-- Sub-topic Select -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" data-i18n="lbl_subtopic">2. सब-टॉपिक चुनें (Select Sub-Topic)</label>
-              <div class="relative">
-                <select id="select-subtopic" disabled required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition appearance-none disabled:opacity-50">
-                  <option value="" disabled selected data-i18n="choose_subtopic">-- पहले विषय चुनें --</option>
-                </select>
-                <i class="ph ph-caret-down absolute right-3.5 top-3.5 text-slate-400 pointer-events-none"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <!-- Date -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" data-i18n="lbl_date">तारीख (Date)</label>
-              <input type="date" id="schedule-date" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition" />
-            </div>
-
-            <!-- Time -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" data-i18n="lbl_time">समय (Time)</label>
-              <input type="time" id="schedule-time" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition" />
-            </div>
-
-            <!-- Plan Type -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" data-i18n="lbl_type">प्रकार (Window Type)</label>
-              <select id="schedule-type" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
-                <option value="main" data-i18n="type_main">मुख्य पढ़ाई (Main Study)</option>
-                <option value="revision" data-i18n="type_revision">रिवीज़न (Revision)</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Difficulty Tagging -->
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">कठिनाई स्तर (Difficulty Level)</label>
-            <div class="flex items-center gap-3">
-              <label class="flex items-center gap-1.5 text-xs font-semibold cursor-pointer">
-                <input type="radio" name="difficulty" value="Easy" checked class="text-emerald-600 focus:ring-emerald-500" />
-                <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">सरल (Easy)</span>
-              </label>
-              <label class="flex items-center gap-1.5 text-xs font-semibold cursor-pointer">
-                <input type="radio" name="difficulty" value="Medium" class="text-amber-600 focus:ring-amber-500" />
-                <span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">मध्यम (Medium)</span>
-              </label>
-              <label class="flex items-center gap-1.5 text-xs font-semibold cursor-pointer">
-                <input type="radio" name="difficulty" value="Hard" class="text-rose-600 focus:ring-rose-500" />
-                <span class="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">कठिन (Hard)</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-end gap-3 pt-2">
-            <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition shadow-md shadow-indigo-200 flex items-center justify-center gap-2">
-              <i class="ph-bold ph-plus-circle text-lg"></i>
-              <span data-i18n="btn_add_to_schedule">शेड्यूल में जोड़ें</span>
+    <!-- Main Navigation Tabs -->
+    <nav class="bg-white border-b border-slate-200">
+        <div class="max-w-5xl mx-auto px-4 flex space-x-6 text-sm">
+            <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="py-3 active-tab flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-pie"></i> Dashboard
             </button>
-          </div>
-        </form>
-      </section>
-
-      <!-- POMODORO & FOCUS TIMER -->
-      <section class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-5 relative z-10">
-          <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-medium text-indigo-200 mb-2">
-              <i class="ph-fill ph-timer"></i>
-              <span data-i18n="timer_badge">फोकस टाइमर और रिमाइंडर</span>
-            </div>
-            <h4 class="text-xl font-bold" data-i18n="timer_title">स्टडी सेशन टाइमर</h4>
-            <p class="text-xs text-slate-400 max-w-sm" data-i18n="timer_desc">समय पूरा होने पर रिमाइंडर बीप बजेगा ताकि आपका ध्यान बना रहे।</p>
-          </div>
-
-          <div class="flex items-center gap-6">
-            <div class="text-4xl sm:text-5xl font-mono font-black tracking-widest text-indigo-300 bg-black/40 px-6 py-3 rounded-2xl border border-indigo-500/30 shadow-inner" id="timer-display">
-              25:00
-            </div>
-            <div class="flex flex-col gap-2">
-              <button id="timer-toggle-btn" class="px-5 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-sm shadow transition flex items-center justify-center gap-1.5">
-                <i class="ph-fill ph-play" id="timer-play-icon"></i>
-                <span id="timer-toggle-text" data-i18n="timer_start">शुरू करें</span>
-              </button>
-              <button id="timer-reset-btn" class="px-5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 font-medium text-xs transition">
-                <span data-i18n="timer_reset">रीसेट (25 मिनट)</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-    </div>
-
-    <!-- ========================================== -->
-    <!-- TAB 2: MY SYLLABUS (IMPORT & DIRECTORY) -->
-    <!-- ========================================== -->
-    <div id="tab-pane-syllabus" class="hidden space-y-6">
-
-      <!-- ADD SYLLABUS BOX (UPLOAD DOCX, PDF, TXT OR PASTE TEXT) -->
-      <section class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-7 space-y-5">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div class="flex items-center gap-3">
-            <div class="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 text-2xl">
-              <i class="ph-bold ph-folder-notch-plus"></i>
-            </div>
-            <div>
-              <h3 class="text-base sm:text-lg font-bold text-slate-900" data-i18n="add_syllabus_title">नया सिलेबस जोड़ें (Add / Import Syllabus)</h3>
-              <p class="text-xs text-slate-500" data-i18n="add_syllabus_sub">वर्ड फाइल (.docx), पीडीएफ (.pdf), टेक्स्ट फाइल या नीचे सीधे टेक्स्ट पेस्ट करें</p>
-            </div>
-          </div>
-          <button id="load-sample-btn-tab" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-xs font-bold transition">
-            <i class="ph ph-flask"></i> <span>डेमो लोड करें</span>
-          </button>
-        </div>
-
-        <!-- 3 Upload Buttons Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button onclick="document.getElementById('file-upload-input').click()" class="p-4 rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 hover:bg-indigo-50 hover:border-indigo-400 transition flex flex-col items-center justify-center gap-2 group text-center">
-            <i class="ph-bold ph-file-doc text-2xl text-indigo-600 group-hover:scale-110 transition"></i>
-            <div>
-              <span class="text-xs font-bold text-slate-800 block">वर्ड फाइल (.docx)</span>
-              <span class="text-[10px] text-slate-500">क्लिक कर अपलोड करें</span>
-            </div>
-          </button>
-
-          <button onclick="document.getElementById('pdf-upload-input').click()" class="p-4 rounded-2xl border-2 border-dashed border-rose-200 bg-rose-50/40 hover:bg-rose-50 hover:border-rose-400 transition flex flex-col items-center justify-center gap-2 group text-center">
-            <i class="ph-bold ph-file-pdf text-2xl text-rose-600 group-hover:scale-110 transition"></i>
-            <div>
-              <span class="text-xs font-bold text-slate-800 block">पीडीएफ फाइल (.pdf)</span>
-              <span class="text-[10px] text-slate-500">क्लिक कर अपलोड करें</span>
-            </div>
-          </button>
-          <input type="file" id="pdf-upload-input" class="hidden" accept=".pdf" />
-
-          <button onclick="document.getElementById('file-upload-input').click()" class="p-4 rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50/40 hover:bg-emerald-50 hover:border-emerald-400 transition flex flex-col items-center justify-center gap-2 group text-center">
-            <i class="ph-bold ph-file-text text-2xl text-emerald-600 group-hover:scale-110 transition"></i>
-            <div>
-              <span class="text-xs font-bold text-slate-800 block">टेक्स्ट फाइल (.txt)</span>
-              <span class="text-[10px] text-slate-500">क्लिक कर अपलोड करें</span>
-            </div>
-          </button>
-          <input type="file" id="file-upload-input" class="hidden" accept=".docx, .txt" />
-        </div>
-
-        <!-- Direct Text Paste Section -->
-        <div class="space-y-2 pt-1">
-          <div class="flex items-center justify-between">
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider" data-i18n="paste_text_label">या यहाँ सिलेबस का टेक्स्ट पेस्ट करें (Paste Raw Text)</label>
-            <span class="text-[11px] text-slate-400">फॉर्मेट: विषय का नाम, फिर उसके नीचे टॉपिक्स</span>
-          </div>
-          <textarea id="raw-syllabus-textarea" rows="4" placeholder="उदाहरण:&#10;इतिहास:&#10;सिंधु घाटी सभ्यता&#10;मौर्य साम्राज्य&#10;&#10;भूगोल:&#10;भारत की नदियाँ&#10;जलवायु और मानसून" class="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3.5 text-xs sm:text-sm font-sans focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"></textarea>
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-            <div class="text-[11px] text-slate-500">
-              💡 <span class="italic">विषय के बाद दो बिन्दु (:) लगाएँ या नई पंक्ति में टॉपिक्स लिखें।</span>
-            </div>
-            <button id="import-pasted-text-btn" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 transition flex items-center gap-1.5">
-              <i class="ph-bold ph-check"></i> <span data-i18n="btn_import_text">टेक्स्ट से सिलेबस जोड़ें</span>
+            <button onclick="switchTab('syllabus')" id="tab-btn-syllabus" class="py-3 text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-book-open"></i> My Syllabus
             </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- SYLLABUS DIRECTORY WITH PROGRESS (%) -->
-      <section class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-          <div>
-            <h3 class="font-bold text-slate-900 text-base" data-i18n="directory_title">आपका सिलेबस व प्रोग्रेस डायरेक्टरी</h3>
-            <p class="text-xs text-slate-500" data-i18n="directory_desc">प्रत्येक विषय की तैयारी का प्रतिशत और सब-टॉपिक सूची</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button id="manual-add-subject-btn" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition flex items-center gap-1">
-              <i class="ph ph-folder-plus text-sm"></i>
-              <span data-i18n="btn_manual_subject">+ नया विषय</span>
+            <button onclick="switchTab('timetable')" id="tab-btn-timetable" class="py-3 text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-calendar-days"></i> Time Table
             </button>
-            <button id="export-backup-btn" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition text-xs font-semibold" title="डेटा बैकअप डाउनलोड करें">
-              <i class="ph ph-download-simple text-base"></i>
-            </button>
-            <button id="clear-all-data-btn" class="px-3 py-1.5 text-rose-600 hover:bg-rose-50 text-xs font-medium rounded-lg transition" title="Clear all local data">
-              <span data-i18n="btn_clear_data">डेटा साफ़ करें</span>
-            </button>
-          </div>
         </div>
+    </nav>
 
-        <!-- Accordion List for Subjects -->
-        <div id="syllabus-accordion-container" class="space-y-4">
-          <!-- Rendered dynamically -->
-        </div>
-      </section>
-
-    </div>
-
-    <!-- ========================================== -->
-    <!-- TAB 3: DAILY TIME TABLE GENERATOR & PREVIEW -->
-    <!-- ========================================== -->
-    <div id="tab-pane-timetable" class="hidden space-y-6">
-
-      <!-- Time Table Generator Parameters Card -->
-      <section class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-7 space-y-5">
-        <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
-          <div class="p-2.5 rounded-2xl bg-amber-50 text-amber-600 text-2xl">
-            <i class="ph-bold ph-calendar-star"></i>
-          </div>
-          <div>
-            <h3 class="text-base sm:text-lg font-bold text-slate-900" data-i18n="tt_generator_title">स्मार्ट टाइम टेबल जनरेटर (Smart Time Table Planner)</h3>
-            <p class="text-xs text-slate-500" data-i18n="tt_generator_desc">दिनों की संख्या, सेशन का समय और बफर/अल्टरनेट दिन चुनकर ऑटो-टाइम टेबल बनाएं</p>
-          </div>
-        </div>
-
-        <form id="timetable-generator-form" class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <!-- From Date -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1" data-i18n="tt_from_date">शुरुआती तारीख (From Date)</label>
-              <input type="date" id="tt-from-date" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500" />
+    <!-- Content Sections -->
+    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
+        <!-- Tab 1: Dashboard -->
+        <section id="tab-dashboard" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-semibold text-slate-500 uppercase">Today's Study</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-today-study">0 Topics</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-semibold text-slate-500 uppercase">Today's Revision</p>
+                    <h3 class="text-2xl font-bold text-blue-600 mt-1" id="stat-today-rev">0 Topics</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-semibold text-slate-500 uppercase">Overall Progress</p>
+                    <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="stat-progress">0%</h3>
+                </div>
             </div>
 
-            <!-- Number of Days -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1" data-i18n="tt_duration">अवधि / कुल दिन (Duration)</label>
-              <select id="tt-duration-days" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500">
-                <option value="7">7 दिन (1 सप्ताह)</option>
-                <option value="15" selected>15 दिन</option>
-                <option value="30">30 दिन (1 महीना)</option>
-                <option value="45">45 दिन</option>
-                <option value="60">60 दिन (2 महीने)</option>
-              </select>
+            <!-- Today's Schedule Card -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-blue-600"></i> Aaj Ka Study Plan
+                </h3>
+                <div id="today-tasks-container" class="text-xs text-slate-500 italic">
+                    Abhi koi topic schedule nahi hai. 'My Syllabus' se topics add karein.
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: My Syllabus -->
+        <section id="tab-syllabus" class="hidden space-y-6">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-2 text-sm">Add / Paste Syllabus</h3>
+                <p class="text-xs text-slate-500 mb-3">Apne subjects aur topics yahan paste karein ya enter karein:</p>
+                <textarea id="raw-syllabus-input" rows="5" class="w-full text-xs p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono" placeholder="Subject Name: Topic 1, Topic 2, Topic 3..."></textarea>
+                <div class="mt-3 flex justify-end">
+                    <button onclick="saveSyllabusText()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg shadow-sm">
+                        Syllabus Save Karein
+                    </button>
+                </div>
             </div>
 
-            <!-- Session Duration (Minutes) -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1" data-i18n="tt_session_time">सेशन अवधि (Session Duration)</label>
-              <select id="tt-session-duration" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500">
-                <option value="30">30 मिनट</option>
-                <option value="45">45 मिनट</option>
-                <option value="60" selected>60 मिनट (1 घंटा)</option>
-                <option value="90">90 मिनट (1.5 घंटे)</option>
-                <option value="120">120 मिनट (2 घंटे)</option>
-              </select>
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-3 text-sm">Saved Syllabus List</h3>
+                <div id="syllabus-list-container" class="text-xs text-slate-500">
+                    Koi syllabus add nahi kiya gaya hai.
+                </div>
             </div>
+        </section>
 
-            <!-- Frequency & Buffer Days -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1" data-i18n="tt_buffer">आवृत्ति / बफर डेज़ (Frequency)</label>
-              <select id="tt-frequency" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500">
-                <option value="1" selected>प्रतिदिन (Daily)</option>
-                <option value="2">एक दिन छोड़कर (Alternate Days)</option>
-                <option value="3">हर 2 दिन बाद (Every 3rd Day)</option>
-                <option value="4">हर 3 दिन बाद (Every 4th Day)</option>
-              </select>
+        <!-- Tab 3: Time Table -->
+        <section id="tab-timetable" class="hidden space-y-6">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-3 text-sm">Daily Schedule Planner</h3>
+                <p class="text-xs text-slate-500 mb-4">Apna study routine aur slots yahan set karein.</p>
+                <div class="text-xs text-slate-400">Time table generator ready.</div>
             </div>
-          </div>
+        </section>
+    </main>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-            <!-- Topics Per Day -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">प्रतिदिन कितने टॉपिक पढ़ेंगे?</label>
-              <input type="number" id="tt-topics-per-day" min="1" max="6" value="2" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500" />
-            </div>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        Managed & Powered by <strong class="text-slate-700">Indian AI Factory</strong>
+    </footer>
 
-            <!-- Start Time of Day -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">दैनिक पढ़ाई का शुरुआती समय</label>
-              <input type="time" id="tt-start-time" value="09:00" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500" />
-            </div>
-          </div>
-
-          <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
-            <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-indigo-100 transition flex items-center gap-2">
-              <i class="ph-bold ph-eye"></i> <span data-i18n="tt_generate_preview">टाइम टेबल प्रीव्यू जनरेट करें</span>
-            </button>
-          </div>
-        </form>
-      </section>
-
-      <!-- PREVIEW RESULT WINDOW -->
-      <section id="timetable-preview-section" class="hidden bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-7 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-          <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
-            <h4 class="font-extrabold text-slate-900 text-base" data-i18n="tt_preview_title">जनरेटेड टाइम टेबल प्रीव्यू (Generated Preview)</h4>
-          </div>
-          <button id="apply-timetable-btn" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-200 transition flex items-center justify-center gap-1.5">
-            <i class="ph-bold ph-check-circle"></i> <span data-i18n="tt_apply_all">यह टाइम टेबल मुख्य डैशबोर्ड में लागू करें</span>
-          </button>
-        </div>
-
-        <div id="timetable-preview-cards" class="space-y-3 max-h-[500px] overflow-y-auto custom-scroll pr-1">
-          <!-- Dynamic generated timeline cards -->
-        </div>
-      </section>
-
-    </div>
-
-  </main>
-
-  <!-- ========================================== -->
-  <!-- BOTTOM FIXED NAVIGATION BAR (MOBILE FIRST) -->
-  <!-- ========================================== -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg sm:hidden">
-    <div class="grid grid-cols-3 max-w-md mx-auto py-2">
-      <button onclick="switchTab('dashboard')" id="bnav-btn-dashboard" class="flex flex-col items-center justify-center gap-1 text-indigo-600">
-        <i class="ph-bold ph-squares-four text-xl"></i>
-        <span class="text-[10px] font-bold" data-i18n="tab_dashboard">डैशबोर्ड</span>
-      </button>
-      <button onclick="switchTab('syllabus')" id="bnav-btn-syllabus" class="flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-indigo-600">
-        <i class="ph-bold ph-books text-xl"></i>
-        <span class="text-[10px] font-bold" data-i18n="tab_syllabus">माय सिलेबस</span>
-      </button>
-      <button onclick="switchTab('timetable')" id="bnav-btn-timetable" class="flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-indigo-600">
-        <i class="ph-bold ph-calendar-check text-xl"></i>
-        <span class="text-[10px] font-bold" data-i18n="tab_timetable">टाइम टेबल</span>
-      </button>
-    </div>
-  </nav>
-
-  <!-- ========================================== -->
-  <!-- 5. AI NOTES / SUMMARY MODAL (GEMINI READY) -->
-  <!-- ========================================== -->
-  <div id="ai-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-200">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <div class="flex items-center gap-2 text-indigo-600">
-          <i class="ph-bold ph-brain text-2xl"></i>
-          <h3 class="text-lg font-extrabold text-slate-900" id="ai-modal-title">AI क्विक नोट्स</h3>
-        </div>
-        <button onclick="closeAiModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700">
-          <i class="ph ph-x text-lg"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3">
-        <div id="ai-content-box" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-700 leading-relaxed max-h-64 overflow-y-auto custom-scroll">
-          लोड हो रहा है...
-        </div>
-        
-        <div class="flex justify-end gap-2 pt-2">
-          <button onclick="closeAiModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition">
-            बंद करें
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Manual Subject Add Modal -->
-  <div id="subject-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-      <h3 class="text-lg font-bold text-slate-900" data-i18n="modal_subject_title">नया विषय और टॉपिक जोड़ें</h3>
-      <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase mb-1" data-i18n="modal_subject_name">विषय का नाम (Subject Name)</label>
-        <input type="text" id="modal-subject-name" placeholder="उदा: General Science / इतिहास" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-indigo-500">
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase mb-1" data-i18n="modal_topics_list">सब-टॉपिक्स (प्रति पंक्ति एक टॉपिक लिखें)</label>
-        <textarea id="modal-topics-list" rows="4" placeholder="टॉपिक 1&#10;टॉपिक 2&#10;टॉपिक 3" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-indigo-500"></textarea>
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button id="modal-cancel-btn" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl text-sm font-medium transition" data-i18n="cancel">रद्द करें</button>
-        <button id="modal-save-btn" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition" data-i18n="save">सेव करें</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast Notification -->
-  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-  <!-- ========================================== -->
-  <!-- 6. JAVASCRIPT LOGIC & CRYPTO ENGINE -->
-  <!-- ========================================== -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    /* ========================================================
-       FIREBASE CONFIGURATION
-       ======================================================== */
-    const firebaseConfig = {
-      apiKey: "AIzaSyDummyKeyForGithubDeployDemoOnly",
-      authDomain: "study-tracker-live.firebaseapp.com",
-      projectId: "study-tracker-live",
-      storageBucket: "study-tracker-live.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:abcdef123456"
-    };
-
-    let app, auth, db;
-    let isCloudConfigured = false;
-
-    // Only attempt Firebase connection if real API key is configured
-    if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("DummyKey")) {
-      try {
-        app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
-        isCloudConfigured = true;
-      } catch (e) {
-        console.warn("Firebase Init fallback to local storage:", e);
-      }
-    }
-
-    /* ========================================================
-       A. DEVICE IDENTIFICATION & APPROVAL LOGIC
-       ======================================================== */
-    function getOrCreateDeviceId() {
-      let devId = localStorage.getItem('app_device_token');
-      if (!devId) {
-        const rand1 = Math.floor(1000 + Math.random() * 9000);
-        const rand2 = Math.floor(1000 + Math.random() * 9000);
-        devId = `REQ-${rand1}-${rand2}`;
-        localStorage.setItem('app_device_token', devId);
-      }
-      return devId;
-    }
-
-    const devId = getOrCreateDeviceId();
-    const requestCodeEl = document.getElementById('user-request-code');
-    if (requestCodeEl) {
-      requestCodeEl.textContent = devId;
-    }
-
-    function checkDeviceApproval() {
-      // 1. Check local storage status
-      const isApproved = localStorage.getItem('app_user_approved') === 'true';
-      if (isApproved) {
-        handleStatusUpdate('approved');
-        return;
-      }
-
-      const localReq = localStorage.getItem(`req_${devId}`);
-      if (localReq) {
-        try {
-          const parsed = JSON.parse(localReq);
-          handleStatusUpdate(parsed.status || 'pending');
-        } catch (e) {
-          handleStatusUpdate('initial');
-        }
-      } else {
-        handleStatusUpdate('initial');
-      }
-
-      // 2. Realtime listener if cloud is enabled
-      if (isCloudConfigured) {
-        signInAnonymously(auth).then(() => {
-          const userDocRef = doc(db, 'access_requests', devId);
-          onSnapshot(userDocRef, (snap) => {
-            if (snap.exists()) {
-              const data = snap.data();
-              handleStatusUpdate(data.status);
-            }
-          }, (err) => console.warn("Firestore sync:", err));
-        }).catch(err => console.warn("Anonymous auth failed:", err));
-      }
-    }
-
-    // Sync status across tabs in same browser (e.g. index.html <-> admin.html testing)
-    window.addEventListener('storage', (e) => {
-      if (e.key === `req_${devId}` || e.key === 'app_user_approved') {
-        checkDeviceApproval();
-      }
-    });
-
-    function handleStatusUpdate(status) {
-      const lockScreen = document.getElementById('device-lock-screen');
-      const pendingBadge = document.getElementById('lock-pending-badge');
-      const rejectedBadge = document.getElementById('lock-rejected-badge');
-      const requestBox = document.getElementById('approval-request-box');
-
-      if (status === 'approved') {
-        localStorage.setItem('app_user_approved', 'true');
-        if (lockScreen) lockScreen.classList.add('hidden');
-        if (typeof confetti === 'function') {
-          confetti({ particleCount: 80, spread: 60 });
-        }
-      } else if (status === 'pending') {
-        localStorage.removeItem('app_user_approved');
-        if (lockScreen) lockScreen.classList.remove('hidden');
-        if (pendingBadge) pendingBadge.classList.remove('hidden');
-        if (rejectedBadge) rejectedBadge.classList.add('hidden');
-        if (requestBox) requestBox.classList.add('hidden');
-      } else if (status === 'rejected') {
-        localStorage.removeItem('app_user_approved');
-        if (lockScreen) lockScreen.classList.remove('hidden');
-        if (rejectedBadge) rejectedBadge.classList.remove('hidden');
-        if (pendingBadge) pendingBadge.classList.add('hidden');
-        if (requestBox) requestBox.classList.add('hidden');
-      } else {
-        // Initial state - prompt user to enter name & request
-        localStorage.removeItem('app_user_approved');
-        if (lockScreen) lockScreen.classList.remove('hidden');
-        if (pendingBadge) pendingBadge.classList.add('hidden');
-        if (rejectedBadge) rejectedBadge.classList.add('hidden');
-        if (requestBox) requestBox.classList.remove('hidden');
-      }
-    }
-
-    // Submit Request button listener
-    const submitReqBtn = document.getElementById('submit-request-btn');
-    if (submitReqBtn) {
-      submitReqBtn.addEventListener('click', async () => {
-        const name = document.getElementById('user-name-input').value.trim();
-        const phone = document.getElementById('user-phone-input').value.trim();
-
-        if (!name) {
-          showToast("कृपया अपना नाम दर्ज करें!");
-          return;
-        }
-
-        const requestData = {
-          id: devId,
-          deviceId: devId,
-          name: name,
-          phone: phone || "N/A",
-          status: "pending",
-          requestedAt: new Date().toISOString()
+    <!-- App Script -->
+    <script>
+        const APP_CONFIG = {
+            brandName: "Indian AI Factory",
+            subscriptionFee: 199,
+            upiId: "nareshkhichar@airtel"
         };
 
-        if (isCloudConfigured) {
-          try {
-            await setDoc(doc(db, 'access_requests', devId), requestData);
-            handleStatusUpdate('pending');
-            showToast("अनुरोध एडमिन को भेज दिया गया है!");
-          } catch (err) {
-            showToast("क्लाउड अनुरोध विफल, लोकल सुरक्षित किया गया।");
-            localStorage.setItem(`req_${devId}`, JSON.stringify(requestData));
-            handleStatusUpdate('pending');
-          }
-        } else {
-          localStorage.setItem(`req_${devId}`, JSON.stringify(requestData));
-          handleStatusUpdate('pending');
-          showToast("अनुरोध सबमिट हो गया! एडमिन पोर्टल (admin.html) से अप्रूव करें।");
-        }
-      });
-    }
-
-    const copyBtn = document.getElementById('copy-req-code-btn');
-    if (copyBtn) {
-      copyBtn.addEventListener('click', () => {
-        copyToClipboard(devId);
-        showToast("डिवाइस कोड कॉपी किया गया!");
-      });
-    }
-
-    function copyToClipboard(text) {
-      const temp = document.createElement("input");
-      document.body.appendChild(temp);
-      temp.value = text;
-      temp.select();
-      document.execCommand("copy");
-      document.body.removeChild(temp);
-    }
-
-    /* ========================================================
-       C. I18N (HINDI & ENGLISH)
-       ======================================================== */
-    const translations = {
-      hi: {
-        app_title: "सिलेबस ट्रैकर",
-        install_app: "ऐप डाउनलोड",
-        tab_dashboard: "डैशबोर्ड",
-        tab_syllabus: "माय सिलेबस",
-        tab_timetable: "डेली टाइम टेबल",
-        overall_report_badge: "लाइव प्रोग्रेस रिपोर्ट",
-        overall_report_title: "सिलेबस तैयारी स्थिति",
-        overall_done: "पूरा हुआ (Completed)",
-        stat_total_topics: "कुल टॉपिक्स",
-        stat_completed_topics: "पूरे किए गए",
-        stat_remaining_topics: "शेष बाकी",
-        add_syllabus_title: "नया सिलेबस जोड़ें (Add / Import Syllabus)",
-        add_syllabus_sub: "वर्ड (.docx), पीडीएफ (.pdf), टेक्स्ट फाइल या नीचे सीधे टेक्स्ट पेस्ट करें",
-        paste_text_label: "या यहाँ सिलेबस का टेक्स्ट पेस्ट करें (Paste Raw Text)",
-        btn_import_text: "टेक्स्ट से सिलेबस जोड़ें",
-        tt_generator_title: "स्मार्ट टाइम टेबल जनरेटर",
-        tt_generator_desc: "दिनों की संख्या, सेशन का समय और बफर/अल्टरनेट दिन चुनकर ऑटो-टाइम टेबल बनाएं",
-        tt_from_date: "शुरुआती तारीख (From Date)",
-        tt_duration: "अवधि / कुल दिन",
-        tt_session_time: "सेशन अवधि",
-        tt_buffer: "आवृत्ति / बफर डेज़",
-        tt_generate_preview: "टाइम टेबल प्रीव्यू जनरेट करें",
-        tt_preview_title: "जनरेटेड टाइम टेबल प्रीव्यू",
-        tt_apply_all: "यह टाइम टेबल मुख्य डैशबोर्ड में लागू करें",
-        quick_guide_title: "सिलेबस इंपोर्ट व बैकअप",
-        quick_guide_desc: "वर्ड (.docx) फाइल अपलोड करें या डेटा बैकअप लें।",
-        load_demo: "डेमो लोड करें",
-        upload_word: "वर्ड फाइल",
-        main_study_window: "आज का मुख्य अध्ययन (Today's Study Plan)",
-        revision_study_window: "आज का रिवीज़न (Today's Revision)",
-        revision_subtitle: "वैज्ञानिक 1-3-7-21 दिवस विधि व पुराने टॉपिक",
-        schedule_title: "नया अध्ययन / रिवीज़न शेड्यूल करें",
-        schedule_desc: "विषय चुनें, सब-टॉपिक चुनें, फिर तारीख और समय सेट करें",
-        lbl_subject: "1. विषय चुनें (Select Subject)",
-        choose_subject: "-- विषय चुनें --",
-        lbl_subtopic: "2. सब-टॉपिक चुनें (Select Sub-Topic)",
-        choose_subtopic: "-- पहले विषय चुनें --",
-        lbl_date: "तारीख (Date)",
-        lbl_time: "समय (Time)",
-        lbl_type: "प्रकार (Window Type)",
-        type_main: "मुख्य पढ़ाई (Main Study)",
-        type_revision: "रिवीज़न (Revision)",
-        btn_add_to_schedule: "शेड्यूल में जोड़ें",
-        timer_badge: "फोकस टाइमर और रिमाइंडर",
-        timer_title: "स्टडी सेशन टाइमर",
-        timer_desc: "समय पूरा होने पर रिमाइंडर बीप बजेगा ताकि आपका ध्यान बना रहे।",
-        timer_start: "शुरू करें",
-        timer_pause: "रोकें",
-        timer_reset: "रीसेट (25 मिनट)",
-        directory_title: "आपका सिलेबस व प्रोग्रेस ट्रैकर",
-        directory_desc: "प्रत्येक विषय की तैयारी का प्रतिशत और सब-टॉपिक सूची",
-        btn_manual_subject: "+ नया विषय",
-        btn_clear_data: "डेटा साफ़ करें",
-        modal_subject_title: "नया विषय और टॉपिक जोड़ें",
-        modal_subject_name: "विषय का नाम (Subject Name)",
-        modal_topics_list: "सब-टॉपिक्स (प्रति पंक्ति एक टॉपिक लिखें)",
-        cancel: "रद्द करें",
-        save: "सेव करें",
-        no_study_tasks: "आज के लिए कोई मुख्य टॉपिक शेड्यूल नहीं है।",
-        no_revision_tasks: "आज के लिए कोई रिवीज़न टॉपिक नहीं है।",
-        toast_scheduled: "शेड्यूल में सफलतापूर्वक जोड़ा गया!",
-        toast_completed: "शानदार! आपने यह टॉपिक पूरा कर लिया 🎉",
-        toast_imported: "वर्ड फ़ाइल से विषय व टॉपिक सफलतापूर्वक इंपोर्ट हो गए!",
-        toast_demo_loaded: "डेमो सिलेबस सफलतापूर्वक लोड कर दिया गया है!"
-      },
-      en: {
-        app_title: "Syllabus Tracker",
-        install_app: "Download App",
-        tab_dashboard: "Dashboard",
-        tab_syllabus: "My Syllabus",
-        tab_timetable: "Time Table",
-        overall_report_badge: "Live Progress Report",
-        overall_report_title: "Syllabus Completion Status",
-        overall_done: "Completed",
-        stat_total_topics: "Total Topics",
-        stat_completed_topics: "Completed",
-        stat_remaining_topics: "Remaining",
-        add_syllabus_title: "Add / Import Syllabus",
-        add_syllabus_sub: "Word (.docx), PDF (.pdf), Text file or paste raw text below",
-        paste_text_label: "Or Paste Raw Syllabus Text Here",
-        btn_import_text: "Import from Text",
-        tt_generator_title: "Smart Time Table Generator",
-        tt_generator_desc: "Set dates, session duration, and buffer days for automated planning",
-        tt_from_date: "From Date",
-        tt_duration: "Duration (Days)",
-        tt_session_time: "Session Duration",
-        tt_buffer: "Frequency / Buffer",
-        tt_generate_preview: "Generate Preview",
-        tt_preview_title: "Generated Time Table Preview",
-        tt_apply_all: "Apply to Main Dashboard Schedule",
-        quick_guide_title: "Import Syllabus & Backup",
-        quick_guide_desc: "Upload Word (.docx) file or backup your syllabus data.",
-        load_demo: "Load Demo",
-        upload_word: "Word File",
-        main_study_window: "Today's Study Plan",
-        revision_study_window: "Today's Revision Window",
-        revision_subtitle: "1-3-7-21 Spaced Repetition System",
-        schedule_title: "Schedule Study or Revision",
-        schedule_desc: "Choose subject, sub-topic, date and time",
-        lbl_subject: "1. Select Subject",
-        choose_subject: "-- Select Subject --",
-        lbl_subtopic: "2. Select Sub-Topic",
-        choose_subtopic: "-- Choose Subject First --",
-        lbl_date: "Date",
-        lbl_time: "Time",
-        lbl_type: "Window Type",
-        type_main: "Main Study",
-        type_revision: "Revision",
-        btn_add_to_schedule: "Add to Schedule",
-        timer_badge: "Focus Timer & Audio Reminder",
-        timer_title: "Study Session Timer",
-        timer_desc: "Reminder beep triggers upon completion to keep you focused.",
-        timer_start: "Start",
-        timer_pause: "Pause",
-        timer_reset: "Reset (25m)",
-        directory_title: "Syllabus & Progress Tracker",
-        directory_desc: "Subject completion percentage & sub-topic directory",
-        btn_manual_subject: "+ Add Subject",
-        btn_clear_data: "Clear Data",
-        modal_subject_title: "Add Subject & Topics",
-        modal_subject_name: "Subject Name",
-        modal_topics_list: "Sub-Topics (One per line)",
-        cancel: "Cancel",
-        save: "Save",
-        no_study_tasks: "No main study topics scheduled for today.",
-        no_revision_tasks: "No revision topics scheduled for today.",
-        toast_scheduled: "Successfully scheduled!",
-        toast_completed: "Great job! Topic completed 🎉",
-        toast_imported: "Syllabus parsed & imported from file!",
-        toast_demo_loaded: "Demo syllabus loaded successfully!"
-      }
-    };
-
-    let currentLang = 'hi';
-    function setLanguage(lang) {
-      currentLang = lang;
-      document.getElementById('lang-label').textContent = lang === 'hi' ? 'English' : 'हिंदी';
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
-          el.textContent = translations[lang][key];
-        }
-      });
-      renderAll();
-    }
-
-    /* ========================================================
-       TAB SWITCHING CONTROLLER
-       ======================================================== */
-    function switchTab(tabName) {
-      const tabs = ['dashboard', 'syllabus', 'timetable'];
-      tabs.forEach(t => {
-        const pane = document.getElementById(`tab-pane-${t}`);
-        const navBtn = document.getElementById(`nav-btn-${t}`);
-        const bnavBtn = document.getElementById(`bnav-btn-${t}`);
-
-        if (t === tabName) {
-          pane.classList.remove('hidden');
-          if (navBtn) {
-            navBtn.classList.add('active', 'text-indigo-600', 'bg-indigo-50', 'border-indigo-200');
-            navBtn.classList.remove('text-slate-600');
-          }
-          if (bnavBtn) {
-            bnavBtn.classList.add('text-indigo-600');
-            bnavBtn.classList.remove('text-slate-500');
-          }
-        } else {
-          pane.classList.add('hidden');
-          if (navBtn) {
-            navBtn.classList.remove('active', 'text-indigo-600', 'bg-indigo-50', 'border-indigo-200');
-            navBtn.classList.add('text-slate-600');
-          }
-          if (bnavBtn) {
-            bnavBtn.classList.remove('text-indigo-600');
-            bnavBtn.classList.add('text-slate-500');
-          }
-        }
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    window.switchTab = switchTab;
-
-    /* ========================================================
-       D. DATA INITIALIZATION & STREAK TRACKER
-       ======================================================== */
-    const DEMO_SYLLABUS = [
-      {
-        id: "sub-1",
-        name: "भारतीय इतिहास (Indian History)",
-        topics: [
-          "सिंधु घाटी सभ्यता (Indus Valley)",
-          "वैदिक काल और उपनिषद",
-          "मौर्य साम्राज्य और अशोक के शिलालेख",
-          "1857 की क्रांति और स्वतंत्रता संग्राम",
-          "संविधान निर्माण सभा और आंदोलन"
-        ]
-      },
-      {
-        id: "sub-2",
-        name: "सामान्य विज्ञान (General Science)",
-        topics: [
-          "न्यूटन के गति के नियम और गुरुत्वाकर्षण",
-          "मानव रक्त परिसंचरण और कोशिका संरचना",
-          "आवर्त सारणी और रासायनिक बंधन",
-          "प्रकाश: परावर्तन, अपवर्तन और लेंस",
-          "पर्यावरण और पारिस्थितिकी तंत्र"
-        ]
-      },
-      {
-        id: "sub-3",
-        name: "गणित व तार्किक क्षमता (Maths & Reasoning)",
-        topics: [
-          "प्रतिशत और लाभ-हानि",
-          "समय, गति और दूरी",
-          "रक्त संबंध और दिशा ज्ञान",
-          "साझेदारी और औसत",
-          "कोडिंग-डिकोडिंग और श्रृंखला"
-        ]
-      }
-    ];
-
-    let syllabus = JSON.parse(localStorage.getItem('syllabus_data') || 'null');
-    let schedules = JSON.parse(localStorage.getItem('schedule_data') || 'null');
-    let studyStreak = parseInt(localStorage.getItem('study_streak') || '1');
-
-    if (!syllabus || syllabus.length === 0) {
-      syllabus = DEMO_SYLLABUS;
-      saveSyllabus();
-    }
-
-    if (!schedules) {
-      const today = new Date().toISOString().split('T')[0];
-      schedules = [
-        {
-          id: 'demo-task-1',
-          subject: "भारतीय इतिहास (Indian History)",
-          topic: "सिंधु घाटी सभ्यता (Indus Valley)",
-          date: today,
-          time: "10:00",
-          type: "main",
-          difficulty: "Medium",
-          completed: false
-        },
-        {
-          id: 'demo-task-2',
-          subject: "सामान्य विज्ञान (General Science)",
-          topic: "न्यूटन के गति के नियम और गुरुत्वाकर्षण",
-          date: today,
-          time: "14:30",
-          type: "revision",
-          difficulty: "Easy",
-          completed: false
-        }
-      ];
-      saveSchedules();
-    }
-
-    function saveSyllabus() {
-      localStorage.setItem('syllabus_data', JSON.stringify(syllabus));
-    }
-
-    function saveSchedules() {
-      localStorage.setItem('schedule_data', JSON.stringify(schedules));
-    }
-
-    document.getElementById('streak-counter-badge').textContent = `${studyStreak} ${currentLang === 'hi' ? 'दिन' : 'Days'}`;
-
-    /* ========================================================
-       E. SOUND EFFECTS & AMBIENT RAIN GENERATOR
-       ======================================================== */
-    function playBeepSound() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15);
-        osc.frequency.setValueAtTime(1174.66, audioCtx.currentTime + 0.3);
-
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.8);
-      } catch (err) {}
-    }
-
-    // Ambient White Noise / Focus generator
-    let ambientAudioCtx = null;
-    let isAmbientPlaying = false;
-    const ambientBtn = document.getElementById('ambient-sound-btn');
-    const ambientIcon = document.getElementById('ambient-icon');
-
-    ambientBtn.addEventListener('click', () => {
-      if (isAmbientPlaying) {
-        if (ambientAudioCtx) ambientAudioCtx.close();
-        isAmbientPlaying = false;
-        ambientIcon.className = "ph-fill ph-drop";
-        ambientBtn.classList.remove('bg-indigo-50', 'text-indigo-600', 'border-indigo-300');
-        showToast("एकाग्रता ध्वनि बंद की गई");
-      } else {
-        try {
-          ambientAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          const bufferSize = ambientAudioCtx.sampleRate * 2;
-          const noiseBuffer = ambientAudioCtx.createBuffer(1, bufferSize, ambientAudioCtx.sampleRate);
-          const output = noiseBuffer.getChannelData(0);
-          for (let i = 0; i < bufferSize; i++) {
-            output[i] = Math.random() * 2 - 1;
-          }
-
-          const whiteNoise = ambientAudioCtx.createBufferSource();
-          whiteNoise.buffer = noiseBuffer;
-          whiteNoise.loop = true;
-
-          const filter = ambientAudioCtx.createBiquadFilter();
-          filter.type = 'lowpass';
-          filter.frequency.value = 500;
-
-          const gain = ambientAudioCtx.createGain();
-          gain.gain.value = 0.05;
-
-          whiteNoise.connect(filter);
-          filter.connect(gain);
-          gain.connect(ambientAudioCtx.destination);
-
-          whiteNoise.start();
-          isAmbientPlaying = true;
-          ambientIcon.className = "ph-fill ph-speaker-high animate-pulse";
-          ambientBtn.classList.add('bg-indigo-50', 'text-indigo-600', 'border-indigo-300');
-          showToast("बारिश जैसी एकाग्रता ध्वनि चालू है 🌧️");
-        } catch (e) {}
-      }
-    });
-
-    /* ========================================================
-       F. SCIENTIFIC 1-3-7-21 DAY AUTO-REVISION SCHEDULER
-       ======================================================== */
-    function scheduleSpacedRepetition(task) {
-      const intervals = [1, 3, 7, 21];
-      const baseDate = new Date();
-
-      intervals.forEach(days => {
-        const targetDate = new Date(baseDate);
-        targetDate.setDate(targetDate.getDate() + days);
-        const dateStr = targetDate.toISOString().split('T')[0];
-
-        schedules.push({
-          id: 'rep_' + Date.now() + '_' + days,
-          subject: task.subject,
-          topic: task.topic,
-          date: dateStr,
-          time: task.time || "10:00",
-          type: "revision",
-          difficulty: task.difficulty || "Medium",
-          completed: false,
-          repetitionDay: days
-        });
-      });
-      saveSchedules();
-      renderMainWindows();
-      showToast(`🧠 1, 3, 7 और 21 दिन बाद के लिए रिवीज़न शेड्यूल हो गया!`);
-    }
-
-    /* ========================================================
-       G. RENDERING TODAY'S STUDY & REVISION WINDOWS
-       ======================================================== */
-    function renderMainWindows() {
-      const todayStr = new Date().toISOString().split('T')[0];
-      const todayFormatted = new Date().toLocaleDateString(currentLang === 'hi' ? 'hi-IN' : 'en-US', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-      document.getElementById('study-date-display').textContent = todayFormatted;
-
-      const studyList = document.getElementById('study-task-list');
-      const revisionList = document.getElementById('revision-task-list');
-
-      const todayMain = schedules.filter(s => s.date === todayStr && s.type === 'main');
-      const todayRevision = schedules.filter(s => s.date === todayStr && s.type === 'revision');
-
-      document.getElementById('study-count-badge').textContent = `${todayMain.length} ${currentLang === 'hi' ? 'टॉपिक' : 'Topics'}`;
-      document.getElementById('revision-count-badge').textContent = `${todayRevision.length} ${currentLang === 'hi' ? 'टॉपिक' : 'Topics'}`;
-
-      // Render Main Study
-      if (todayMain.length === 0) {
-        studyList.innerHTML = `
-          <div class="text-center py-6 text-slate-400">
-            <i class="ph ph-calendar-blank text-3xl mb-1 text-slate-300"></i>
-            <p class="text-xs sm:text-sm font-medium">${translations[currentLang].no_study_tasks}</p>
-          </div>
-        `;
-      } else {
-        studyList.innerHTML = todayMain.map(task => renderTaskItem(task)).join('');
-      }
-
-      // Render Revision
-      if (todayRevision.length === 0) {
-        revisionList.innerHTML = `
-          <div class="text-center py-5 text-slate-400">
-            <i class="ph ph-clock-countdown text-2xl mb-1 text-slate-300"></i>
-            <p class="text-xs sm:text-sm font-medium">${translations[currentLang].no_revision_tasks}</p>
-          </div>
-        `;
-      } else {
-        revisionList.innerHTML = todayRevision.map(task => renderTaskItem(task)).join('');
-      }
-    }
-
-    function renderTaskItem(task) {
-      const diffColors = {
-        Easy: "bg-emerald-50 text-emerald-700 border-emerald-200",
-        Medium: "bg-amber-50 text-amber-700 border-amber-200",
-        Hard: "bg-rose-50 text-rose-700 border-rose-200"
-      };
-
-      return `
-        <div class="py-3 flex items-center justify-between gap-3 group transition">
-          <div class="flex items-start gap-3 min-w-0">
-            <button onclick="toggleTaskCompletion('${task.id}')" class="mt-0.5 w-6 h-6 rounded-lg border flex-shrink-0 flex items-center justify-center transition ${task.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-indigo-400 bg-white text-transparent'}">
-              <i class="ph-bold ph-check text-xs"></i>
-            </button>
-            <div class="truncate">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-semibold px-2 py-0.5 rounded-md ${task.type === 'main' ? 'bg-indigo-50 text-indigo-700' : 'bg-amber-50 text-amber-700'}">${task.subject}</span>
-                <span class="text-xs font-bold text-slate-500 flex items-center gap-1">
-                  <i class="ph ph-clock"></i> ${task.time || '--:--'}
-                </span>
-                ${task.difficulty ? `<span class="text-[10px] font-bold px-1.5 py-0.2 rounded border ${diffColors[task.difficulty] || ''}">${task.difficulty}</span>` : ''}
-                ${task.repetitionDay ? `<span class="text-[10px] font-extrabold bg-purple-50 text-purple-700 border border-purple-200 px-1.5 py-0.2 rounded">R-${task.repetitionDay}</span>` : ''}
-              </div>
-              <h4 class="text-sm font-bold text-slate-800 truncate mt-0.5 ${task.completed ? 'line-through text-slate-400' : ''}">${task.topic}</h4>
-            </div>
-          </div>
-          <div class="flex items-center gap-1 flex-shrink-0">
-            <!-- AI Quick Notes Button -->
-            <button onclick="openAiNotes('${task.subject}', '${encodeURIComponent(task.topic)}')" class="p-1.5 rounded-lg text-indigo-600 hover:bg-indigo-50 transition" title="AI नोट्स व क्विज़">
-              <i class="ph-bold ph-sparkle text-base"></i>
-            </button>
-            <button onclick="deleteScheduleTask('${task.id}')" class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition" title="Delete">
-              <i class="ph ph-trash text-base"></i>
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
-    window.toggleTaskCompletion = function(taskId) {
-      const task = schedules.find(t => t.id === taskId);
-      if (task) {
-        task.completed = !task.completed;
-        saveSchedules();
-        renderMainWindows();
-        renderSyllabusDirectory();
-        updateOverallProgressStats();
-
-        if (task.completed) {
-          playBeepSound();
-          confetti({ particleCount: 70, spread: 60, origin: { y: 0.8 } });
-          showToast(translations[currentLang].toast_completed);
-
-          // If main study task, offer automatic 1-3-7-21 Spaced Repetition
-          if (task.type === 'main') {
-            setTimeout(() => {
-              scheduleSpacedRepetition(task);
-            }, 500);
-          }
-        }
-      }
-    };
-
-    window.deleteScheduleTask = function(taskId) {
-      schedules = schedules.filter(t => t.id !== taskId);
-      saveSchedules();
-      renderMainWindows();
-      renderSyllabusDirectory();
-    };
-
-    /* ========================================================
-       H. SUBJECT & SUB-TOPIC SELECTION DROPDOWNS
-       ======================================================== */
-    const subjectSelect = document.getElementById('select-subject');
-    const subtopicSelect = document.getElementById('select-subtopic');
-
-    function populateSubjectDropdown() {
-      subjectSelect.innerHTML = `<option value="" disabled selected>${translations[currentLang].choose_subject}</option>`;
-      syllabus.forEach(sub => {
-        const opt = document.createElement('option');
-        opt.value = sub.id;
-        opt.textContent = sub.name;
-        subjectSelect.appendChild(opt);
-      });
-    }
-
-    subjectSelect.addEventListener('change', (e) => {
-      const selectedId = e.target.value;
-      const found = syllabus.find(s => s.id === selectedId);
-
-      subtopicSelect.innerHTML = `<option value="" disabled selected>${translations[currentLang].choose_subtopic}</option>`;
-      if (found && found.topics && found.topics.length > 0) {
-        subtopicSelect.disabled = false;
-        found.topics.forEach(top => {
-          const opt = document.createElement('option');
-          opt.value = top;
-          opt.textContent = top;
-          subtopicSelect.appendChild(opt);
-        });
-      } else {
-        subtopicSelect.disabled = true;
-      }
-    });
-
-    document.getElementById('schedule-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const subjectId = subjectSelect.value;
-      const sub = syllabus.find(s => s.id === subjectId);
-      const topicName = subtopicSelect.value;
-      const dateVal = document.getElementById('schedule-date').value;
-      const timeVal = document.getElementById('schedule-time').value;
-      const typeVal = document.getElementById('schedule-type').value;
-      const diffVal = document.querySelector('input[name="difficulty"]:checked')?.value || "Easy";
-
-      if (!sub || !topicName || !dateVal || !timeVal) return;
-
-      const newTask = {
-        id: 'task_' + Date.now(),
-        subject: sub.name,
-        topic: topicName,
-        date: dateVal,
-        time: timeVal,
-        type: typeVal,
-        difficulty: diffVal,
-        completed: false
-      };
-
-      schedules.unshift(newTask);
-      saveSchedules();
-      renderMainWindows();
-      renderSyllabusDirectory();
-      updateOverallProgressStats();
-      showToast(translations[currentLang].toast_scheduled);
-      subtopicSelect.selectedIndex = 0;
-    });
-
-    /* ========================================================
-       OVERALL SYLLABUS PROGRESS STATS (DASHBOARD)
-       ======================================================== */
-    function updateOverallProgressStats() {
-      let total = 0;
-      let completed = 0;
-
-      syllabus.forEach(sub => {
-        sub.topics.forEach(t => {
-          total++;
-          if (schedules.some(s => s.subject === sub.name && s.topic === t && s.completed)) {
-            completed++;
-          }
-        });
-      });
-
-      const remaining = Math.max(0, total - completed);
-      const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
-
-      document.getElementById('stat-total-topics').textContent = total;
-      document.getElementById('stat-completed-topics').textContent = completed;
-      document.getElementById('stat-remaining-topics').textContent = remaining;
-      document.getElementById('stat-overall-percentage').textContent = `${pct}%`;
-      document.getElementById('stat-progress-bar-fill').style.width = `${pct}%`;
-    }
-
-    /* ========================================================
-       I. SYLLABUS DIRECTORY WITH PROGRESS (%) TRACKER
-       ======================================================== */
-    function renderSyllabusDirectory() {
-      const container = document.getElementById('syllabus-accordion-container');
-      if (syllabus.length === 0) {
-        container.innerHTML = `<p class="text-sm text-slate-400 py-4 text-center">कोई विषय उपलब्ध नहीं है। ऊपर से वर्ड फ़ाइल अपलोड करें या नया विषय जोड़ें।</p>`;
-        return;
-      }
-
-      container.innerHTML = syllabus.map((sub, idx) => {
-        // Calculate completion percentage for this subject
-        const totalTopics = sub.topics.length || 1;
-        const completedCount = sub.topics.filter(t => {
-          return schedules.some(s => s.subject === sub.name && s.topic === t && s.completed);
-        }).length;
-        const pct = Math.round((completedCount / totalTopics) * 100);
-
-        return `
-          <div class="border border-slate-200 rounded-2xl overflow-hidden transition bg-white shadow-xs">
-            <button onclick="toggleAccordion('acc-${sub.id}')" class="w-full px-4 py-3 bg-slate-50 hover:bg-slate-100 flex flex-col sm:flex-row sm:items-center justify-between text-left transition gap-2">
-              <span class="flex items-center gap-2.5">
-                <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">${idx + 1}</span>
-                <span class="font-bold text-slate-800 text-sm">${sub.name}</span>
-                <span class="text-xs text-slate-500 font-normal">(${sub.topics.length} टॉपिक्स)</span>
-              </span>
-              
-              <!-- Progress Bar -->
-              <div class="flex items-center gap-3 w-full sm:w-48">
-                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                  <div class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
-                </div>
-                <span class="text-xs font-bold text-slate-700 w-10 text-right">${pct}%</span>
-                <i class="ph ph-caret-down text-slate-400 transition-transform duration-200" id="icon-acc-${sub.id}"></i>
-              </div>
-            </button>
-
-            <div id="acc-${sub.id}" class="hidden p-4 bg-white border-t border-slate-100">
-              <ul class="space-y-2 mb-3">
-                ${sub.topics.map((t, tIdx) => {
-                  const isDone = schedules.some(s => s.subject === sub.name && s.topic === t && s.completed);
-                  return `
-                    <li class="flex items-center justify-between text-xs py-2 px-3 rounded-xl bg-slate-50 hover:bg-indigo-50/50 group border border-slate-100">
-                      <span class="text-slate-700 font-medium flex items-center gap-2 ${isDone ? 'line-through text-slate-400' : ''}">
-                        ${isDone ? '<i class="ph-bold ph-check text-emerald-500"></i>' : `${tIdx + 1}.`} ${t}
-                      </span>
-                      <div class="flex items-center gap-1.5">
-                        <button onclick="openAiNotes('${sub.name}', '${encodeURIComponent(t)}')" class="text-indigo-600 hover:text-indigo-800 font-bold p-1 rounded bg-white border border-indigo-100" title="AI समरी">
-                          <i class="ph-bold ph-sparkle"></i>
-                        </button>
-                        <button onclick="quickScheduleTopic('${sub.id}', '${encodeURIComponent(t)}')" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 text-[11px] bg-white px-2 py-1 rounded border border-indigo-200 shadow-xs">
-                          <i class="ph ph-calendar-plus"></i> आज जोड़ें
-                        </button>
-                      </div>
-                    </li>
-                  `;
-                }).join('')}
-              </ul>
-              <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                <button onclick="deleteEntireSubject('${sub.id}')" class="text-xs text-rose-600 hover:underline">
-                  विषय हटाएं (Delete Subject)
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    window.toggleAccordion = function(id) {
-      const panel = document.getElementById(id);
-      const icon = document.getElementById('icon-' + id);
-      if (panel.classList.contains('hidden')) {
-        panel.classList.remove('hidden');
-        if (icon) icon.classList.add('rotate-180');
-      } else {
-        panel.classList.add('hidden');
-        if (icon) icon.classList.remove('rotate-180');
-      }
-    };
-
-    window.quickScheduleTopic = function(subId, encodedTopic) {
-      const topicName = decodeURIComponent(encodedTopic);
-      const sub = syllabus.find(s => s.id === subId);
-      if (!sub) return;
-
-      const today = new Date().toISOString().split('T')[0];
-      const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-
-      schedules.unshift({
-        id: 'task_' + Date.now(),
-        subject: sub.name,
-        topic: topicName,
-        date: today,
-        time: nowTime,
-        type: 'main',
-        difficulty: 'Medium',
-        completed: false
-      });
-
-      saveSchedules();
-      renderMainWindows();
-      renderSyllabusDirectory();
-      updateOverallProgressStats();
-      showToast(translations[currentLang].toast_scheduled);
-    };
-
-    window.deleteEntireSubject = function(subId) {
-      syllabus = syllabus.filter(s => s.id !== subId);
-      saveSyllabus();
-      populateSubjectDropdown();
-      renderSyllabusDirectory();
-      updateOverallProgressStats();
-      showToast(currentLang === 'hi' ? 'विषय हटा दिया गया।' : 'Subject deleted.');
-    };
-
-    /* ========================================================
-       J. WORD (.DOCX), PDF & TEXT FILE + RAW TEXT PARSER
-       ======================================================== */
-    const fileInput = document.getElementById('file-upload-input');
-    const pdfInput = document.getElementById('pdf-upload-input');
-
-    fileInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      try {
-        let rawText = '';
-        if (file.name.endsWith('.docx')) {
-          const arrayBuffer = await file.arrayBuffer();
-          const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
-          rawText = result.value;
-        } else {
-          rawText = await file.text();
-        }
-
-        parseAndAddSyllabus(rawText);
-        showToast(translations[currentLang].toast_imported);
-      } catch (err) {
-        showToast("फ़ाइल पढ़ने में त्रुटि। कृपया सामान्य .docx या .txt फ़ाइल चुनें।");
-      }
-      fileInput.value = '';
-    });
-
-    // PDF Parser using PDF.js
-    pdfInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      try {
-        showToast("पीडीएफ से टेक्स्ट निकाला जा रहा है...");
-        const arrayBuffer = await file.arrayBuffer();
-        if (window.pdfjsLib) {
-          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          let fullText = '';
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map(item => item.str).join(' ');
-            fullText += pageText + '\n';
-          }
-          parseAndAddSyllabus(fullText);
-          showToast("पीडीएफ से सिलेबस सफलतापूर्वक लोड हो गया!");
-        } else {
-          showToast("PDF लाइब्रेरी लोड नहीं हो सकी। कृपया वर्ड फाइल या टेक्स्ट का उपयोग करें।");
-        }
-      } catch (err) {
-        showToast("पीडीएफ पढ़ने में त्रुटि। कृपया टेक्स्ट कॉपी-पेस्ट का उपयोग करें।");
-      }
-      pdfInput.value = '';
-    });
-
-    // Direct Text Paste Import Button
-    document.getElementById('import-pasted-text-btn').addEventListener('click', () => {
-      const pasted = document.getElementById('raw-syllabus-textarea').value.trim();
-      if (!pasted) {
-        showToast("कृपया पहले सिलेबस टेक्स्ट पेस्ट करें!");
-        return;
-      }
-      parseAndAddSyllabus(pasted);
-      document.getElementById('raw-syllabus-textarea').value = '';
-      showToast("टेक्स्ट से सिलेबस सफलतापूर्वक लोड कर दिया गया!");
-    });
-
-    function parseAndAddSyllabus(text) {
-      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      let newSubjects = [];
-      let currentSub = null;
-
-      lines.forEach((line) => {
-        const isSubjectHeader = /^(विषय|subject|unit|chapter|\d+[\.\)]\s*[A-Z\u0900-\u097F])/i.test(line) || line.endsWith(':');
-
-        if (isSubjectHeader || !currentSub) {
-          const cleanName = line.replace(/^(विषय|subject|unit|chapter)[\s:]*/i, '').replace(/[:]$/, '');
-          currentSub = {
-            id: 'sub_' + Math.random().toString(36).substr(2, 9),
-            name: cleanName || "नया विषय",
-            topics: []
-          };
-          newSubjects.push(currentSub);
-        } else {
-          const cleanTopic = line.replace(/^[-*•\d+\.]+\s*/, '');
-          if (cleanTopic.length > 1) {
-            currentSub.topics.push(cleanTopic);
-          }
-        }
-      });
-
-      newSubjects = newSubjects.filter(s => s.topics.length > 0);
-      if (newSubjects.length > 0) {
-        syllabus = [...syllabus, ...newSubjects];
-        saveSyllabus();
-        populateSubjectDropdown();
-        renderSyllabusDirectory();
-        updateOverallProgressStats();
-      }
-    }
-
-    /* ========================================================
-       SMART TIME TABLE GENERATOR ENGINE
-       ======================================================== */
-    let generatedTimeTablePlan = [];
-
-    document.getElementById('tt-from-date').value = new Date().toISOString().split('T')[0];
-
-    document.getElementById('timetable-generator-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      if (!syllabus || syllabus.length === 0) {
-        showToast("कृपया पहले 'माय सिलेबस' में विषय और टॉपिक जोड़ें!");
-        return;
-      }
-
-      const fromDateStr = document.getElementById('tt-from-date').value;
-      const durationDays = parseInt(document.getElementById('tt-duration-days').value);
-      const sessionMinutes = parseInt(document.getElementById('tt-session-duration').value);
-      const frequencyStep = parseInt(document.getElementById('tt-frequency').value);
-      const topicsPerDay = parseInt(document.getElementById('tt-topics-per-day').value) || 2;
-      const startTime = document.getElementById('tt-start-time').value || "09:00";
-
-      // Collect all incomplete topics
-      let allTopicsQueue = [];
-      syllabus.forEach(sub => {
-        sub.topics.forEach(top => {
-          allTopicsQueue.push({ subject: sub.name, topic: top });
-        });
-      });
-
-      if (allTopicsQueue.length === 0) {
-        showToast("सिलेबस में कोई टॉपिक नहीं मिला!");
-        return;
-      }
-
-      generatedTimeTablePlan = [];
-      let topicIndex = 0;
-      let baseDate = new Date(fromDateStr);
-
-      for (let dayOffset = 0; dayOffset < durationDays; dayOffset += frequencyStep) {
-        if (topicIndex >= allTopicsQueue.length) break;
-
-        const planDate = new Date(baseDate);
-        planDate.setDate(planDate.getDate() + dayOffset);
-        const dateStr = planDate.toISOString().split('T')[0];
-
-        // Format start time and calculate session slots
-        let [hour, minute] = startTime.split(':').map(Number);
-
-        for (let t = 0; t < topicsPerDay; t++) {
-          if (topicIndex < allTopicsQueue.length) {
-            const item = allTopicsQueue[topicIndex];
-            const slotHour = String(hour).padStart(2, '0');
-            const slotMin = String(minute).padStart(2, '0');
-
-            generatedTimeTablePlan.push({
-              id: 'gen_' + Date.now() + '_' + topicIndex,
-              subject: item.subject,
-              topic: item.topic,
-              date: dateStr,
-              time: `${slotHour}:${slotMin}`,
-              duration: sessionMinutes,
-              type: 'main',
-              difficulty: 'Medium',
-              completed: false
+        function switchTab(tabId) {
+            ['dashboard', 'syllabus', 'timetable'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${t}`).className = 'py-3 text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
             });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tabId}`).className = 'py-3 active-tab flex items-center gap-1.5';
+        }
 
-            // Increment time for next session
-            minute += sessionMinutes + 15; // 15 min break between sessions
-            while (minute >= 60) {
-              hour = (hour + 1) % 24;
-              minute -= 60;
+        function getDeviceId() {
+            let id = localStorage.getItem('iaf_device_id');
+            if (!id) {
+                id = 'DEV-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+                localStorage.setItem('iaf_device_id', id);
             }
-            topicIndex++;
-          }
+            return id;
         }
-      }
 
-      renderTimeTablePreview();
-      showToast(`🎯 ${generatedTimeTablePlan.length} सेशन्स का टाइम टेबल तैयार हो गया!`);
-    });
+        function checkDeviceApproval() {
+            const isApproved = localStorage.getItem('iaf_user_approved');
+            const lockScreen = document.getElementById('device-lock-screen');
+            if (isApproved === 'true') {
+                lockScreen.classList.add('hidden');
+            } else {
+                lockScreen.classList.remove('hidden');
+                const reqSent = localStorage.getItem('iaf_req_sent');
+                if (reqSent === 'true') {
+                    document.getElementById('step-register').classList.add('hidden');
+                    document.getElementById('step-payment').classList.remove('hidden');
+                }
+            }
+        }
 
-    function renderTimeTablePreview() {
-      const previewSection = document.getElementById('timetable-preview-section');
-      const cardsContainer = document.getElementById('timetable-preview-cards');
+        function submitApprovalRequest() {
+            const name = document.getElementById('user-name').value.trim();
+            const phone = document.getElementById('user-phone').value.trim();
+            if (!name || !phone) {
+                alert('Kripya apna naam aur phone number dono bharein.');
+                return;
+            }
 
-      if (generatedTimeTablePlan.length === 0) {
-        previewSection.classList.add('hidden');
-        return;
-      }
+            const deviceId = getDeviceId();
+            const requestObj = {
+                deviceId,
+                name,
+                phone,
+                amount: APP_CONFIG.subscriptionFee,
+                date: new Date().toLocaleDateString(),
+                status: 'pending'
+            };
 
-      previewSection.classList.remove('hidden');
+            let allReqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
+            allReqs = allReqs.filter(r => r.deviceId !== deviceId);
+            allReqs.push(requestObj);
+            localStorage.setItem('iaf_all_requests', JSON.stringify(allReqs));
 
-      // Group plan by date
-      const grouped = {};
-      generatedTimeTablePlan.forEach(p => {
-        if (!grouped[p.date]) grouped[p.date] = [];
-        grouped[p.date].push(p);
-      });
+            localStorage.setItem('iaf_req_sent', 'true');
+            document.getElementById('step-register').classList.add('hidden');
+            document.getElementById('step-payment').classList.remove('hidden');
+        }
 
-      cardsContainer.innerHTML = Object.keys(grouped).map(dateKey => {
-        const items = grouped[dateKey];
-        const dateDisplay = new Date(dateKey).toLocaleDateString(currentLang === 'hi' ? 'hi-IN' : 'en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric'
+        function copyUpiId() {
+            navigator.clipboard.writeText(APP_CONFIG.upiId);
+            alert('UPI ID copy kar li gayi hai: ' + APP_CONFIG.upiId);
+        }
+
+        function checkStatusManual() {
+            const deviceId = getDeviceId();
+            let allReqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
+            const myReq = allReqs.find(r => r.deviceId === deviceId);
+
+            if (myReq && myReq.status === 'approved') {
+                localStorage.setItem('iaf_user_approved', 'true');
+                document.getElementById('device-lock-screen').classList.add('hidden');
+                alert('Aapka subscription activate ho gaya hai!');
+            } else {
+                alert('Abhi tak approve nahi hua hai. Kripya thoda intezar karein ya admin se sampark karein.');
+            }
+        }
+
+        function saveSyllabusText() {
+            const txt = document.getElementById('raw-syllabus-input').value.trim();
+            if (!txt) return;
+            localStorage.setItem('iaf_saved_syllabus', txt);
+            document.getElementById('syllabus-list-container').innerText = txt;
+            alert('Syllabus successfully save ho gaya!');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkDeviceApproval();
+            const saved = localStorage.getItem('iaf_saved_syllabus');
+            if (saved) {
+                document.getElementById('syllabus-list-container').innerText = saved;
+            }
         });
-
-        return `
-          <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/70 space-y-2">
-            <div class="flex items-center justify-between text-xs font-bold text-slate-700 border-b border-slate-200 pb-1.5">
-              <span class="flex items-center gap-1.5 text-indigo-700">
-                <i class="ph-bold ph-calendar"></i> ${dateDisplay} (${dateKey})
-              </span>
-              <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">${items.length} सेशन</span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-              ${items.map(it => `
-                <div class="bg-white border border-slate-200 p-2.5 rounded-xl shadow-xs">
-                  <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1">
-                    <span class="text-indigo-600 bg-indigo-50 px-1.5 py-0.2 rounded">${it.subject}</span>
-                    <span><i class="ph ph-clock"></i> ${it.time} (${it.duration}m)</span>
-                  </div>
-                  <h5 class="text-xs font-bold text-slate-800 truncate">${it.topic}</h5>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Apply previewed timetable into active schedule
-    document.getElementById('apply-timetable-btn').addEventListener('click', () => {
-      if (generatedTimeTablePlan.length === 0) return;
-
-      schedules = [...schedules, ...generatedTimeTablePlan];
-      saveSchedules();
-      renderMainWindows();
-      renderSyllabusDirectory();
-      updateOverallProgressStats();
-      confetti({ particleCount: 90, spread: 70 });
-      showToast("🎉 टाइम टेबल सफलतापूर्वक आपके मुख्य डैशबोर्ड पर लागू कर दिया गया!");
-      switchTab('dashboard');
-    });
-
-    /* ========================================================
-       K. POMODORO FOCUS TIMER
-       ======================================================== */
-    let timerDuration = 25 * 60;
-    let timerRemaining = timerDuration;
-    let timerInterval = null;
-    let isTimerRunning = false;
-
-    const timerDisplay = document.getElementById('timer-display');
-    const timerToggleBtn = document.getElementById('timer-toggle-btn');
-    const timerToggleText = document.getElementById('timer-toggle-text');
-    const timerPlayIcon = document.getElementById('timer-play-icon');
-    const timerResetBtn = document.getElementById('timer-reset-btn');
-
-    function updateTimerUI() {
-      const minutes = Math.floor(timerRemaining / 60);
-      const seconds = timerRemaining % 60;
-      timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
-
-    timerToggleBtn.addEventListener('click', () => {
-      if (isTimerRunning) {
-        clearInterval(timerInterval);
-        isTimerRunning = false;
-        timerToggleText.textContent = translations[currentLang].timer_start;
-        timerPlayIcon.className = "ph-fill ph-play";
-      } else {
-        isTimerRunning = true;
-        timerToggleText.textContent = translations[currentLang].timer_pause;
-        timerPlayIcon.className = "ph-fill ph-pause";
-
-        timerInterval = setInterval(() => {
-          if (timerRemaining > 0) {
-            timerRemaining--;
-            updateTimerUI();
-          } else {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            updateTimerUI();
-            timerToggleText.textContent = translations[currentLang].timer_start;
-            timerPlayIcon.className = "ph-fill ph-play";
-            playBeepSound();
-            confetti({ particleCount: 70, spread: 80 });
-            showToast('⏰ समय पूरा हुआ! 5 मिनट का ब्रेक लें।');
-          }
-        }, 1000);
-      }
-    });
-
-    timerResetBtn.addEventListener('click', () => {
-      clearInterval(timerInterval);
-      isTimerRunning = false;
-      timerRemaining = timerDuration;
-      updateTimerUI();
-      timerToggleText.textContent = translations[currentLang].timer_start;
-      timerPlayIcon.className = "ph-fill ph-play";
-    });
-
-    /* ========================================================
-       L. BACKUP & RESTORE DATA (JSON)
-       ======================================================== */
-    document.getElementById('export-backup-btn').addEventListener('click', () => {
-      const backupData = {
-        syllabus: syllabus,
-        schedules: schedules,
-        exportDate: new Date().toISOString()
-      };
-      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Syllabus_Backup_${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast("बैकअप फ़ाइल डाउनलोड हो गई!");
-    });
-
-    /* ========================================================
-       M. AI QUICK NOTES & QUIZ (GEMINI READY)
-       ======================================================== */
-    window.openAiNotes = async function(subject, encodedTopic) {
-      const topic = decodeURIComponent(encodedTopic);
-      const modal = document.getElementById('ai-modal');
-      const title = document.getElementById('ai-modal-title');
-      const box = document.getElementById('ai-content-box');
-
-      title.textContent = `AI सारांश: ${topic}`;
-      box.innerHTML = `<div class="flex items-center gap-2 text-indigo-600"><i class="ph-bold ph-spinner animate-spin text-lg"></i> <span>महत्वपूर्ण नोट्स तैयार किए जा रहे हैं...</span></div>`;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-
-      // Built-in intelligent educational synthesis
-      try {
-        const apiKey = "";
-        if (apiKey) {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-              contents: [{
-                parts: [{ text: `विषय: ${subject}, टॉपिक: ${topic}। इस टॉपिक के परीक्षा उपयोगी मुख्य 4 बुलेट पॉइंट्स और 2 अभ्यास बहुविकल्पीय प्रश्न हिंदी में संक्षेप में प्रदान करें।` }]
-              }]
-            })
-          });
-          const data = await res.json();
-          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-          box.innerHTML = `<div class="whitespace-pre-line">${text || 'सारांश लोड नहीं हो सका।'}</div>`;
-        } else {
-          // Instant high-yield revision card template
-          setTimeout(() => {
-            box.innerHTML = `
-              <div class="space-y-3">
-                <div class="p-3 bg-indigo-50 border border-indigo-100 rounded-xl">
-                  <h5 class="font-bold text-indigo-900 text-xs uppercase tracking-wider mb-1">🎯 मुख्य परीक्षा बिंदु (Key Exam Points):</h5>
-                  <ul class="list-disc pl-4 space-y-1 text-slate-700">
-                    <li><strong>मूल संकल्पना:</strong> ${topic} के बुनियादी सिद्धांत और प्रमुख परिभाषाएं याद करें।</li>
-                    <li><strong>विगत वर्षों के प्रश्न:</strong> इस टॉपिक से अक्सर विश्लेषणात्मक व प्रत्यक्ष प्रश्न पूछे जाते हैं।</li>
-                    <li><strong>रिवीज़न टिप:</strong> सूत्रों या तिथियों का एक अलग शॉर्ट-नोट बनाएं।</li>
-                  </ul>
-                </div>
-                <div class="p-3 bg-amber-50 border border-amber-100 rounded-xl">
-                  <h5 class="font-bold text-amber-900 text-xs uppercase tracking-wider mb-1">📝 सेल्फ-असेसमेंट प्रश्न:</h5>
-                  <p class="text-slate-800">1. ${topic} का वास्तविक परीक्षा या जीवन में क्या प्रमुख अनुप्रयोग है?</p>
-                </div>
-              </div>
-            `;
-          }, 400);
-        }
-      } catch (e) {
-        box.innerHTML = `<p class="text-rose-500">त्रुटि। कृपया पुनः प्रयास करें।</p>`;
-      }
-    };
-
-    window.closeAiModal = function() {
-      const modal = document.getElementById('ai-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    };
-
-    /* ========================================================
-       N. CLOCK & REMINDER TICK
-       ======================================================== */
-    function updateLiveClock() {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      document.getElementById('current-live-time').textContent = timeStr;
-
-      const currentHoursMins = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-      const todayStr = now.toISOString().split('T')[0];
-
-      schedules.forEach(task => {
-        if (!task.completed && task.date === todayStr && task.time === currentHoursMins && !task.beepTriggered) {
-          task.beepTriggered = true;
-          playBeepSound();
-          showToast(`🔔 पढ़ाई का समय: ${task.topic}`);
-        }
-      });
-    }
-
-    /* ========================================================
-       O. TOAST SYSTEM
-       ======================================================== */
-    function showToast(message) {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = "bg-slate-900/95 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-xl border border-slate-700/50 flex items-center gap-2 transform transition-all duration-300 translate-y-3 opacity-0 pointer-events-auto";
-      toast.innerHTML = `<i class="ph-bold ph-bell-ringing text-indigo-400"></i> <span>${message}</span>`;
-      container.appendChild(toast);
-
-      setTimeout(() => {
-        toast.classList.remove('translate-y-3', 'opacity-0');
-      }, 50);
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-      }, 3500);
-    }
-
-    /* ========================================================
-       P. INITIALIZATION
-       ======================================================== */
-    document.getElementById('lang-toggle-btn').addEventListener('click', () => {
-      setLanguage(currentLang === 'hi' ? 'en' : 'hi');
-    });
-
-    document.getElementById('load-sample-btn-tab').addEventListener('click', () => {
-      syllabus = JSON.parse(JSON.stringify(DEMO_SYLLABUS));
-      saveSyllabus();
-      renderAll();
-      showToast(translations[currentLang].toast_demo_loaded);
-    });
-
-    document.getElementById('clear-all-data-btn').addEventListener('click', () => {
-      syllabus = [];
-      schedules = [];
-      saveSyllabus();
-      saveSchedules();
-      renderAll();
-      showToast(currentLang === 'hi' ? 'सभी डेटा साफ़ कर दिया गया है।' : 'All local data cleared.');
-    });
-
-    // Manual subject addition modal
-    const subjectModal = document.getElementById('subject-modal');
-    document.getElementById('manual-add-subject-btn').addEventListener('click', () => {
-      document.getElementById('modal-subject-name').value = '';
-      document.getElementById('modal-topics-list').value = '';
-      subjectModal.classList.remove('hidden');
-      subjectModal.classList.add('flex');
-    });
-
-    document.getElementById('modal-cancel-btn').addEventListener('click', () => {
-      subjectModal.classList.add('hidden');
-      subjectModal.classList.remove('flex');
-    });
-
-    document.getElementById('modal-save-btn').addEventListener('click', () => {
-      const name = document.getElementById('modal-subject-name').value.trim();
-      const rawTopics = document.getElementById('modal-topics-list').value.split('\n').map(t => t.trim()).filter(Boolean);
-      if (!name) return;
-
-      syllabus.push({
-        id: 'sub_' + Date.now(),
-        name: name,
-        topics: rawTopics.length > 0 ? rawTopics : ["परिचय (Introduction)"]
-      });
-
-      saveSyllabus();
-      populateSubjectDropdown();
-      renderSyllabusDirectory();
-      subjectModal.classList.add('hidden');
-      subjectModal.classList.remove('flex');
-      showToast(currentLang === 'hi' ? 'नया विषय जोड़ दिया गया!' : 'Subject added successfully!');
-    });
-
-    function renderAll() {
-      populateSubjectDropdown();
-      renderMainWindows();
-      renderSyllabusDirectory();
-      updateOverallProgressStats();
-    }
-
-    // Set default schedule date
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('schedule-date').value = today;
-    document.getElementById('schedule-time').value = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-    if (document.getElementById('tt-from-date')) {
-      document.getElementById('tt-from-date').value = today;
-    }
-
-    // Initialize Security & App
-    checkDeviceApproval();
-    setLanguage('hi');
-    setInterval(updateLiveClock, 1000);
-    updateLiveClock();
-
-    // PWA Install prompt handler
-    let deferredPrompt = null;
-    const installBtn = document.getElementById('pwa-install-btn');
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBtn.classList.remove('hidden');
-      installBtn.classList.add('inline-flex');
-    });
-
-    installBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          showToast('ऐप इंस्टॉल हो रहा है...');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-      }
-    });
-
-    // Register Service Worker for offline PWA
-    if ('serviceWorker' in navigator) {
-      const swCode = `
-        self.addEventListener('install', (e) => self.skipWaiting());
-        self.addEventListener('activate', (e) => self.clients.claim());
-        self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => new Response("Offline"))));
-      `;
-      const blob = new Blob([swCode], { type: 'text/javascript' });
-      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-    }
-  </script>
+    </script>
 </body>
 </html>

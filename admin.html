@@ -1,3 +1,4 @@
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzYU5YUeavEAKfd3ZS71zBy8ITDTAm6dacxsqGbZR9qwSWhXiKxAFSpH6RqnN65jeh7/exec";
 <!DOCTYPE html>
 <html lang="hi" class="dark">
 <head>
@@ -12,11 +13,12 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at top right, #111827, #0b0f19 75%);
+            background: radial-gradient(circle at top right, #111827, #0b0f19 70%);
         }
         .glass-panel {
-            background: rgba(17, 24, 39, 0.78);
+            background: rgba(17, 24, 39, 0.75);
             backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
         .glass-card {
@@ -27,10 +29,6 @@
         .ai-glow-btn {
             background: linear-gradient(135deg, #4f46e5, #6366f1);
             box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
-        }
-        .ai-glow-btn:hover {
-            background: linear-gradient(135deg, #4338ca, #4f46e5);
-            box-shadow: 0 0 25px rgba(99, 102, 241, 0.55);
         }
     </style>
 </head>
@@ -53,7 +51,6 @@
                 <button onclick="verifyAdminPin()" class="w-full py-2.5 ai-glow-btn text-white font-semibold rounded-xl text-sm transition">
                     Login Karein
                 </button>
-                <p class="text-[11px] text-slate-500 text-center">डिफ़ॉल्ट पिन: <strong class="text-indigo-400 font-mono">9999</strong></p>
             </div>
         </div>
     </div>
@@ -85,9 +82,9 @@
         </header>
 
         <!-- Main Content -->
-        <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+        <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
             <!-- Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="glass-card p-4 rounded-2xl border border-slate-800">
                     <p class="text-xs font-semibold text-slate-400 uppercase">Total Requests</p>
                     <h3 class="text-2xl font-black text-white mt-1" id="stat-total-requests">0</h3>
@@ -108,8 +105,8 @@
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
                         <i class="fa-solid fa-users text-indigo-400"></i> User Access Requests
                     </h3>
-                    <button onclick="loadRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-rotate-right"></i> Refresh List
+                    <button onclick="loadRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl border border-slate-700 transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Refresh List
                     </button>
                 </div>
                 <div class="overflow-x-auto">
@@ -134,6 +131,7 @@
             </div>
         </main>
 
+        <!-- Footer -->
         <footer class="glass-panel border-t border-slate-800 py-3 text-center text-xs text-slate-500 mt-auto">
             Secure Admin Access • Indian AI Factory
         </footer>
@@ -143,7 +141,7 @@
     <div id="change-pin-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="glass-panel rounded-2xl max-w-xs w-full p-5 border border-slate-700 text-left">
             <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-key text-indigo-400"></i> Change Master PIN
+                <i class="fa-solid fa-lock text-indigo-400"></i> Change Master PIN
             </h3>
             <div class="space-y-3 text-xs mb-4">
                 <div>
@@ -176,7 +174,7 @@
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 loadRequests();
             } else {
-                alert('गलत PIN! कृपया सही मास्टर PIN (9999) दर्ज करें।');
+                alert('Galat PIN! Kripya sahi master PIN enter karein.');
             }
         }
 
@@ -202,16 +200,16 @@
             const currentPin = getStoredAdminPin();
 
             if (oldPin !== currentPin) {
-                alert('पुराना PIN गलत है!');
+                alert('Purana PIN galat hai!');
                 return;
             }
             if (!newPin || newPin.length < 4) {
-                alert('नया PIN कम से कम 4 अंकों का होना चाहिए।');
+                alert('Naya PIN kam se kam 4 anko ka hona chahiye.');
                 return;
             }
 
             localStorage.setItem('iaf_admin_pin', newPin);
-            alert('मास्टर PIN सफलतापूर्वक बदल दिया गया है!');
+            alert('Aapka Master PIN safaltapurvak change ho gaya hai!');
             closeChangePinModal();
         }
 
@@ -224,7 +222,7 @@
             document.getElementById('stat-pending-requests').innerText = reqs.filter(r => r.status === 'pending').length;
 
             if (reqs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">अभी कोई अनुरोध मौजूद नहीं है।</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Abhi koi requests nahi hain.</td></tr>`;
                 return;
             }
 
@@ -234,7 +232,7 @@
                         <div class="font-bold text-white">${r.name || 'Anonymous'}</div>
                         <div class="text-[11px] text-slate-400">${r.phone || 'N/A'}</div>
                     </td>
-                    <td class="p-3.5 font-mono text-[11px] text-cyan-300 font-bold">${r.deviceId}</td>
+                    <td class="p-3.5 font-mono text-[11px] text-cyan-300">${r.deviceId}</td>
                     <td class="p-3.5 font-bold text-indigo-300">₹${r.amount || 199}</td>
                     <td class="p-3.5 text-slate-400">${r.date || 'N/A'}</td>
                     <td class="p-3.5">
@@ -245,7 +243,7 @@
                     </td>
                     <td class="p-3.5 text-center space-x-1.5">
                         ${r.status !== 'approved' ? `
-                            <button onclick="updateStatus('${r.deviceId}', 'approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-xl text-[11px] font-semibold transition shadow">
+                            <button onclick="updateStatus('${r.deviceId}', 'approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-xl text-[11px] font-semibold transition">
                                 <i class="fa-solid fa-check mr-1"></i> Approve
                             </button>
                         ` : `
@@ -268,7 +266,7 @@
             });
             localStorage.setItem('iaf_all_requests', JSON.stringify(reqs));
             loadRequests();
-            alert(`डिवाइस ${deviceId} का स्टेटस '${newStatus}' कर दिया गया है!`);
+            alert(`Device ${deviceId} status badalkar '${newStatus}' kar diya gaya hai.`);
         }
     </script>
 </body>

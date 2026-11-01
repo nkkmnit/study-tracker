@@ -278,6 +278,10 @@
 
         function renderRequestTable(reqs) {
             const tbody = document.getElementById('request-table-body');
+            if (!Array.isArray(reqs)) {
+                console.warn("reqs is not an array:", reqs);
+                reqs = JSON.parse(localStorage.getItem('iaf_all_requests') || '[]');
+            }
             
             document.getElementById('stat-total-requests').innerText = reqs.length;
             document.getElementById('stat-approved-requests').innerText = reqs.filter(r => r.status === 'approved').length;

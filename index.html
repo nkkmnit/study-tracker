@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="IAF Tracker">
     <link rel="icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="icon-192.png"><rect width='100' height='100' rx='25' fill='%234f46e5'/><text x='50' y='68' font-size='50' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>AI</text></svg>">
+    <link rel="apple-touch-icon" href="icon-192.png">
     
     <link rel="manifest" href="manifest.json">
 
@@ -177,6 +177,11 @@
                         <i class="fa-solid fa-rotate-right"></i>
                         <span data-i18n="checkStatusBtn">Approval Status Check Karein</span>
                     </button>
+                    <button onclick="enableReRequest()" class="w-full py-2 bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-500/30 text-indigo-300 rounded-xl text-xs font-medium transition flex items-center justify-center gap-2 mt-2">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>Naam / Mobile Badlein ya Dubara Request Bhejein</span>
+                    </button>
+
                 </div>
             </div>
         </div>
@@ -829,6 +834,13 @@
         }
 
         // Check Status: Checks from Live Google Sheet
+        
+        function enableReRequest() {
+            localStorage.removeItem('iaf_req_sent');
+            document.getElementById('step-payment').classList.add('hidden');
+            document.getElementById('step-register').classList.remove('hidden');
+        }
+
         function checkStatusManual() {
             const deviceId = getDeviceId();
             
